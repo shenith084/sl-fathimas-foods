@@ -20,7 +20,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         return;
       }
       
-      const role = await getUserRole(user.uid);
+      const role = await getUserRole(user.uid, user.email);
       if (role !== "owner" && role !== "staff") {
         router.push("/products"); // Kick customers out of admin
         return;

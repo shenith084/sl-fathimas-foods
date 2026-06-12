@@ -60,7 +60,7 @@ export async function createOrUpdateUserDoc(
   return role;
 }
 
-export async function isAdminUser(uid: string): Promise<boolean> {
-  const role = await getUserRole(uid);
+export async function isAdminUser(uid: string, email?: string | null): Promise<boolean> {
+  const role = await getUserRole(uid, email);
   return role === "owner" || role === "staff";
 }
