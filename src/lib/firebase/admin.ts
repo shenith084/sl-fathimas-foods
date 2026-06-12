@@ -17,12 +17,17 @@ function getAdminApp(): App {
 
   if (adminSdkKey) {
     try {
-      const serviceAccount = JSON.parse(adminSdkKey);
+      // Remove surrounding single or double quotes if Next.js didn't strip them
+      const cleanedKey = adminSdkKey.replace(/^['"]|['"]$/g, '');
+      const serviceAccount = JSON.parse(cleanedKey);
+      
       adminApp = initializeApp({
         credential: cert(serviceAccount),
         projectId,
       });
-    } catch {
+      console.log("Firebase Admin SDK successfully initialized with Service Account Key.");
+    } catch (error) {
+      console.error("CRITICAL ERROR: Failed to parse FIREBASE_ADMIN_SDK_KEY:", error);
       adminApp = initializeApp({ projectId });
     }
   } else {
