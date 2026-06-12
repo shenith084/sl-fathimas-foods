@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display, Dancing_Script } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -85,9 +83,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable} ${script.variable}`}>
       <body className="font-sans antialiased bg-cream text-charcoal">
-        <Navbar />
         <main>{children}</main>
-        <Footer />
       </body>
     </html>
   );

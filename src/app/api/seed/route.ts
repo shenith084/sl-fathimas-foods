@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase/client";
-import { doc, writeBatch } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase/admin";
+import { FieldValue } from "firebase-admin/firestore";
 
 const categories = [
   { id: "biriyani-kit", name: "Biriyani Kit", slug: "biriyani-kit", emoji: "🍛", color: "bg-amber-100" },
@@ -275,18 +275,25 @@ const products = [
 
 export async function GET() {
   try {
-    const batch = writeBatch(db);
+    const batch = adminDb.batch();
 
     // Seed Categories
     for (const cat of categories) {
-      const docRef = doc(db, "categories", cat.id);
+      const docRef = adminDb.collection("categories").doc(cat.id);
       batch.set(docRef, cat);
     }
 
     // Seed Products
     for (const prod of products) {
-      const docRef = doc(db, "products", prod.id);
-      batch.set(docRef, prod);
+      const docRef = adminDb.collection("products").doc(prod.id);
+      batch.set(docRef, {
+        ...prod,
+        stock_count: 50,
+        availability: "in_stock",
+        created_at: FieldValue.serverTimestamp(),
+        updated_at: FieldValue.serverTimestamp(),
+        deleted_at: null,
+      });
     }
 
     await batch.commit();
