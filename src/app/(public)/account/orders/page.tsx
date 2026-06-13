@@ -17,6 +17,7 @@ interface Order {
   paymentDetails: { method: string };
   shippingDetails: { firstName: string; lastName: string; address: string; city: string; district: string };
   items: { name: string; qty: number; price: number; emoji: string; vacuum?: boolean }[];
+  status_history?: { status: string; timestamp: string; note?: string }[];
   createdAt: string;
 }
 
@@ -107,6 +108,12 @@ export default function MyOrdersPage() {
                       <div className="flex items-center gap-3 flex-wrap mb-1">
                         <p className="text-xs font-mono text-[#888]">#{order.id.substring(0, 12)}...</p>
                         <StatusBadge status={order.status} />
+                        {order.status_history?.some(h => h.note) && (
+                          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 border border-blue-100 rounded-full">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Update</span>
+                          </div>
+                        )}
                       </div>
                       <p className="text-sm text-[#555] mt-0.5 truncate font-medium">
                         {order.items?.map((i) => i.name).join(", ")}
@@ -146,6 +153,27 @@ export default function MyOrdersPage() {
                           ))}
                         </div>
                       </div>
+
+                      {/* Tracking Notes */}
+                      {order.status_history && order.status_history.some(h => h.note) && (
+                        <div>
+                          <p className="text-xs font-bold tracking-widest text-[#D98C1F] uppercase mb-4">Tracking Updates</p>
+                          <div className="space-y-3">
+                            {order.status_history.filter(h => h.note).map((h, i) => (
+                              <div key={i} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm flex gap-3 items-start">
+                                <div className="w-2 h-2 rounded-full bg-[#D98C1F] mt-1.5 flex-shrink-0" />
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <StatusBadge status={h.status} />
+                                    <span className="text-xs text-[#aaa]">{new Date(h.timestamp).toLocaleString("en-LK")}</span>
+                                  </div>
+                                  <p className="text-sm text-[#444] font-medium">{h.note}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Items */}
                       <div>

@@ -81,7 +81,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable} ${script.variable}`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable} ${script.variable}`} data-scroll-behavior="smooth">
       <body className="font-sans antialiased bg-cream text-charcoal">
         <main>{children}</main>
       </body>

@@ -62,137 +62,185 @@ export default function CartPage() {
   }
 
   return (
-    <div className="bg-[#FAF7F2] min-h-screen">
+    <div className="bg-[#FAF7F2] min-h-screen pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 py-5 px-4">
-        <div className="max-w-7xl mx-auto">
-          <nav className="flex items-center gap-1.5 text-xs text-[#999] mb-2">
-            <Link href="/" className="hover:text-[#D98C1F]">Home</Link>
-            <ChevronRight className="w-3 h-3" />
-            <span className="text-[#444]">Shopping Cart</span>
-          </nav>
-          <h1 className="font-display font-bold text-[#222] text-2xl md:text-3xl">
-            Shopping <span className="text-[#D98C1F]">Cart</span>
-          </h1>
-          <p className="text-[#666] text-sm mt-1">{items.length} items in your cart</p>
-        </div>
+      <div className="pt-12 pb-8 px-4 max-w-6xl mx-auto">
+        <nav className="flex items-center gap-2 text-[13px] text-[#888] font-medium mb-4">
+          <Link href="/" className="hover:text-[#D98C1F] transition-colors">Home</Link>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <span className="text-[#222]">Cart</span>
+        </nav>
+        <h1 className="font-display font-bold text-[#222] text-4xl mb-2">
+          Your Cart
+        </h1>
+        <p className="text-[#555] text-sm">Review your selected items before checkout.</p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (
-              <div key={`${item.id}-${item.vacuum}`} className="bg-white rounded-2xl p-4 shadow-sm flex gap-4">
-                {/* Image */}
-                <div className="w-20 h-20 bg-gradient-to-br from-[#F4EFE6] to-[#FAF7F2] rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-4xl">{item.emoji}</span>
-                </div>
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 px-8 py-5 border-b border-gray-100 text-[13px] font-bold text-[#222]">
+            <div className="col-span-6">Product</div>
+            <div className="col-span-2 text-center">Price</div>
+            <div className="col-span-2 text-center">Quantity</div>
+            <div className="col-span-2 text-center">Total</div>
+          </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <Link href={`/products/${item.id}`} className="font-display font-semibold text-[#222] text-sm hover:text-[#D98C1F] transition-colors line-clamp-2">
-                      {item.name}
-                    </Link>
+          {/* Table Body */}
+          <div className="divide-y divide-gray-50">
+            {items.map((item) => {
+              const itemPrice = item.price + (item.vacuum ? 50 : 0);
+              const itemTotal = itemPrice * item.qty;
+              return (
+                <div key={`${item.id}-${item.vacuum}`} className="grid grid-cols-12 gap-4 px-8 py-6 items-center hover:bg-gray-50/50 transition-colors">
+                  {/* Product Info */}
+                  <div className="col-span-6 flex items-center gap-6">
+                    <div className="w-20 h-20 bg-gradient-to-br from-[#F4EFE6] to-[#FAF7F2] rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm border border-gray-100 overflow-hidden">
+                      <span className="text-4xl drop-shadow-sm select-none">{item.emoji}</span>
+                    </div>
+                    <div>
+                      <Link href={`/products/${item.id}`} className="font-display font-bold text-[#222] text-[15px] hover:text-[#D98C1F] transition-colors line-clamp-2 leading-snug">
+                        {item.name}
+                      </Link>
+                      {item.vacuum && (
+                        <span className="inline-block mt-1.5 text-[10px] bg-[#2C4631]/10 text-[#2C4631] px-2 py-0.5 rounded-md font-semibold uppercase tracking-wider">
+                          + Vacuum Packaging
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Price */}
+                  <div className="col-span-2 text-center font-semibold text-[#222] text-[13px]">
+                    LKR {itemPrice.toLocaleString()}.00
+                  </div>
+
+                  {/* Quantity */}
+                  <div className="col-span-2 flex justify-center">
+                    <div className="flex items-center bg-white border border-gray-200 rounded-xl p-0.5 w-[100px]">
+                      <button onClick={() => updateQty(item.id, item.vacuum, -1)} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-[#222] transition-colors rounded-lg font-bold text-lg">
+                        −
+                      </button>
+                      <span className="flex-1 text-center font-bold text-[#222] text-[13px]">{item.qty}</span>
+                      <button onClick={() => updateQty(item.id, item.vacuum, 1)} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-[#222] transition-colors rounded-lg font-bold text-lg">
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Total & Remove */}
+                  <div className="col-span-2 flex items-center justify-between pl-4">
+                    <span className="font-bold text-[#222] text-[13px]">
+                      LKR {itemTotal.toLocaleString()}.00
+                    </span>
                     <button
                       onClick={() => removeItem(item.id, item.vacuum)}
                       aria-label="Remove item"
-                      className="text-gray-300 hover:text-red-500 transition-colors flex-shrink-0"
+                      className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-red-200 hover:text-red-500 hover:bg-red-50 transition-all bg-white"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                   </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
-                  {item.vacuum && (
-                    <span className="inline-block mt-1 text-[10px] bg-[#2C4631]/10 text-[#2C4631] px-2 py-0.5 rounded-full font-medium">
-                      + Vacuum Packaging (+LKR 50)
-                    </span>
-                  )}
-
-                  <div className="flex items-center justify-between mt-3">
-                    {/* Qty */}
-                    <div className="flex items-center gap-2 bg-[#FAF7F2] rounded-lg p-0.5">
-                      <button onClick={() => updateQty(item.id, item.vacuum, -1)} className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-white transition-colors">
-                        <Minus className="w-3 h-3 text-[#555]" />
-                      </button>
-                      <span className="w-6 text-center font-semibold text-sm">{item.qty}</span>
-                      <button onClick={() => updateQty(item.id, item.vacuum, 1)} className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-white transition-colors">
-                        <Plus className="w-3 h-3 text-[#555]" />
-                      </button>
-                    </div>
-                    {/* Price */}
-                    <span className="font-display font-bold text-[#D98C1F]">
-                      LKR {((item.price + (item.vacuum ? 50 : 0)) * item.qty).toLocaleString()}.00
-                    </span>
-                  </div>
+        {/* Bottom Section: Coupon & Order Summary */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          {/* Left: Coupon */}
+          <div className="space-y-6">
+            <div className="bg-[#FAF7F2] rounded-3xl p-8 border border-[#EBE5D9]">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-10 h-10 bg-[#E8F2EA] rounded-xl flex items-center justify-center text-[#2C4631]">
+                  <Tag className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-[#222] text-[15px]">Have a coupon?</h3>
+                  <p className="text-[#666] text-[13px]">Enter your coupon code</p>
                 </div>
               </div>
-            ))}
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={coupon}
+                  onChange={(e) => setCoupon(e.target.value)}
+                  placeholder="Enter coupon code"
+                  className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-[13px] font-medium focus:outline-none focus:border-[#2C4631] transition-colors bg-white shadow-sm"
+                />
+                <button className="bg-[#2C4631] hover:bg-[#1E3322] text-white text-[13px] font-bold px-8 py-3 rounded-xl transition-colors shadow-sm tracking-wide">
+                  APPLY
+                </button>
+              </div>
+            </div>
 
-            {/* Continue shopping */}
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 text-sm font-medium text-[#2C4631] hover:text-[#D98C1F] transition-colors"
+              className="inline-flex items-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-[#222] font-bold text-[13px] px-6 py-3.5 rounded-xl transition-colors"
             >
-              ← Continue Shopping
+              <ChevronRight className="w-4 h-4 rotate-180 text-gray-500" />
+              CONTINUE SHOPPING
             </Link>
           </div>
 
-          {/* Order Summary */}
-          <div>
-            <div className="bg-white rounded-2xl p-6 shadow-sm sticky top-24">
-              <h2 className="font-display font-bold text-[#222] text-lg mb-5">Order Summary</h2>
+          {/* Right: Order Summary */}
+          <div className="bg-[#FAF7F2] rounded-3xl p-8 border border-[#EBE5D9]">
+            <h2 className="font-display font-bold text-[#222] text-xl mb-6">Order Summary</h2>
 
-              {/* Coupon */}
-              <div className="flex gap-2 mb-5">
-                <div className="relative flex-1">
-                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999]" />
-                  <input
-                    type="text"
-                    value={coupon}
-                    onChange={(e) => setCoupon(e.target.value)}
-                    placeholder="Coupon code"
-                    className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#D98C1F] transition-colors"
-                  />
-                </div>
-                <button className="bg-[#2C4631] hover:bg-[#1E3322] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                  Apply
-                </button>
+            <div className="space-y-4 mb-6">
+              <div className="flex justify-between text-[13px] font-medium text-[#555]">
+                <span>Subtotal ({items.reduce((acc, i) => acc + i.qty, 0)} items)</span>
+                <span className="text-[#222] font-semibold">LKR {subtotal.toLocaleString()}.00</span>
               </div>
+              <div className="flex justify-between text-[13px] font-medium text-[#555]">
+                <span>Delivery Fee</span>
+                <span className="text-[#222] font-semibold">LKR {deliveryCharge.toLocaleString()}.00</span>
+              </div>
+            </div>
 
-              {/* Summary rows */}
-              <div className="space-y-3 mb-5">
-                <div className="flex justify-between text-sm text-[#666]">
-                  <span>Subtotal</span>
-                  <span>LKR {subtotal.toLocaleString()}.00</span>
+            <div className="border-t border-gray-200/60 pt-5 pb-6 flex justify-between items-center font-display">
+              <span className="font-bold text-[#222] text-xl">Total</span>
+              <span className="font-bold text-[#D98C1F] text-2xl">LKR {total.toLocaleString()}.00</span>
+            </div>
+
+            <Link
+              href="/checkout"
+              id="cart-checkout-btn"
+              className="flex items-center justify-center gap-3 w-full bg-[#D98C1F] hover:bg-[#B8740F] text-white font-bold py-4 rounded-xl transition-colors shadow-md text-[13px] tracking-wide"
+            >
+              PROCEED TO CHECKOUT
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+            </Link>
+
+            {/* Trust Badges */}
+            <div className="grid grid-cols-3 gap-2 mt-8 pt-6 border-t border-gray-200/60">
+              <div className="flex flex-col items-center text-center gap-2">
+                <div className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                 </div>
-                <div className="flex justify-between text-sm text-[#666]">
-                  <span>Delivery Charge</span>
-                  <span>LKR {deliveryCharge.toLocaleString()}.00</span>
-                </div>
-                <div className="flex justify-between items-center text-xs text-[#999] bg-[#F4EFE6] rounded-lg px-3 py-2">
-                  <span>🚚 Estimated delivery: ~5 days</span>
-                </div>
-                <div className="border-t border-gray-100 pt-3 flex justify-between font-display font-bold text-[#222]">
-                  <span>Total</span>
-                  <span className="text-[#D98C1F]">LKR {total.toLocaleString()}.00</span>
+                <div>
+                  <h4 className="text-[10px] font-bold text-[#222]">Secure Checkout</h4>
+                  <p className="text-[9px] text-[#888]">100% Safe & Secure</p>
                 </div>
               </div>
-
-              <Link
-                href="/checkout"
-                id="cart-checkout-btn"
-                className="block w-full text-center bg-[#D98C1F] hover:bg-[#B8740F] text-white font-bold py-4 rounded-2xl transition-all duration-200 shadow-md hover:shadow-lg"
-              >
-                Proceed to Checkout →
-              </Link>
-
-              {/* Trust */}
-              <div className="mt-5 text-center space-y-1">
-                <p className="text-[#999] text-xs">🔒 Secure checkout</p>
-                <p className="text-[#999] text-xs">✅ 100% Natural Ingredients</p>
-                <p className="text-[#999] text-xs">☪️ Halal Certified</p>
+              <div className="flex flex-col items-center text-center gap-2">
+                <div className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                </div>
+                <div>
+                  <h4 className="text-[10px] font-bold text-[#222]">100% Homemade</h4>
+                  <p className="text-[9px] text-[#888]">Premium Quality</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center text-center gap-2">
+                <div className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" /></svg>
+                </div>
+                <div>
+                  <h4 className="text-[10px] font-bold text-[#222]">Islandwide Delivery</h4>
+                  <p className="text-[9px] text-[#888]">Across Sri Lanka</p>
+                </div>
               </div>
             </div>
           </div>

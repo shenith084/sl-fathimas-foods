@@ -25,6 +25,8 @@ export default function CheckoutPage() {
   const clearCart = useCartStore((state) => state.clearCart);
   const getCartTotal = useCartStore((state) => state.getCartTotal);
 
+  const [mounted, setMounted] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -33,15 +35,20 @@ export default function CheckoutPage() {
     paymentMethod: "cod", bankReceiptNote: "",
   });
   const [errorMsg, setErrorMsg] = useState("");
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
   // Redirect to cart if empty
   useEffect(() => {
-    if (items.length === 0) {
+    if (mounted && items.length === 0 && !orderPlaced) {
       router.push("/cart");
     }
-  }, [items, router]);
+  }, [items, router, mounted, orderPlaced]);
 
   // Autofill signed in user info
   useEffect(() => {
@@ -59,8 +66,16 @@ export default function CheckoutPage() {
   }, []);
 
   const subtotal = getCartTotal();
-  const delivery = subtotal > 0 ? 450 : 0;
+  const delivery = subtotal > 0 ? 300 : 0;
   const total = subtotal + delivery;
+
+  if (!mounted) {
+    return (
+      <div className="bg-[#FAF7F2] min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#2C4631] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   const handleContinueToPayment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +89,34 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     setLoading(true);
     setErrorMsg("");
+
+    let receiptUrl = "";
+    if (form.paymentMethod === "bank") {
+      if (!receiptFile) {
+        setErrorMsg("Please upload your bank transfer receipt.");
+        setLoading(false);
+        return;
+      }
+      try {
+        const formData = new FormData();
+        formData.append("file", receiptFile);
+        
+        const uploadRes = await fetch("/api/v1/upload-receipt", {
+          method: "POST",
+          body: formData,
+        });
+        
+        const uploadJson = await uploadRes.json();
+        if (!uploadRes.ok || !uploadJson.success) {
+          throw new Error(uploadJson.message || "Failed to upload receipt.");
+        }
+        receiptUrl = uploadJson.url;
+      } catch (err: any) {
+        setErrorMsg(err.message || "Failed to upload receipt. Please try again.");
+        setLoading(false);
+        return;
+      }
+    }
     
     const orderData = {
       items: items.map(item => ({
@@ -97,7 +140,8 @@ export default function CheckoutPage() {
       },
       paymentDetails: {
         method: form.paymentMethod,
-        status: "pending"
+        status: "pending",
+        ...(receiptUrl && { receiptUrl })
       },
       subtotal,
       deliveryCharge: delivery,
@@ -119,6 +163,7 @@ export default function CheckoutPage() {
         throw new Error(json.error || "Failed to process order. Please try again.");
       }
 
+      setOrderPlaced(true);
       clearCart();
       router.push(`/order-confirmation?orderId=${json.data.id}`);
     } catch (err: any) {
@@ -244,13 +289,31 @@ export default function CheckoutPage() {
                       <p className="font-semibold text-[#222] text-sm">🏦 Bank Transfer</p>
                       <p className="text-[#666] text-xs mt-1">Transfer to our bank account and upload the receipt.</p>
                       {form.paymentMethod === "bank" && (
-                        <div className="mt-3 bg-[#F4EFE6] rounded-xl p-4 text-xs text-[#555] space-y-1">
-                          <p className="font-semibold text-[#222]">Bank Account Details:</p>
-                          <p>Bank: <span className="font-medium">People's Bank</span></p>
-                          <p>Account Name: <span className="font-medium">SL Fathima&apos;s Foods</span></p>
-                          <p>Account No: <span className="font-medium">123-456-789-012</span></p>
-                          <p>Branch: <span className="font-medium">Colombo Main Branch</span></p>
-                          <p className="mt-2 text-[#999]">Please send order ID and payment screenshot to our WhatsApp (+94 77 123 4567) to confirm.</p>
+                        <div className="mt-3 bg-[#F4EFE6] rounded-xl p-4 text-xs text-[#555] space-y-3">
+                          <div>
+                            <p className="font-semibold text-[#222]">BOC Bank</p>
+                            <p>Account Name: <span className="font-medium">A R F SHAHANA</span></p>
+                            <p>Account No: <span className="font-medium">92878052</span></p>
+                            <p>Branch: <span className="font-medium">Kurunegala Branch</span></p>
+                          </div>
+                          <div className="pt-2 border-t border-[#E8DFCC]">
+                            <p className="font-semibold text-[#222]">Commercial Bank (COM BANK)</p>
+                            <p>Account Name: <span className="font-medium">A R F SHAHANA</span></p>
+                            <p>Account No: <span className="font-medium">8009702437</span></p>
+                            <p>Branch: <span className="font-medium">Narammala Branch</span></p>
+                          </div>
+                          
+                          <div className="pt-3 border-t border-[#E8DFCC]">
+                            <label className="block font-semibold text-[#222] mb-1">Upload Payment Receipt *</label>
+                            <p className="text-[10px] text-[#888] mb-2">Accepted formats: .png, .jpg, .jpeg, .pdf (Max 5MB)</p>
+                            <input 
+                              type="file" 
+                              accept=".png,.jpg,.jpeg,.pdf"
+                              onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                              className="w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#D98C1F] file:text-white hover:file:bg-[#B8740F] cursor-pointer"
+                            />
+                            {receiptFile && <p className="text-green-600 mt-1 font-medium">✓ File selected: {receiptFile.name}</p>}
+                          </div>
                         </div>
                       )}
                     </div>

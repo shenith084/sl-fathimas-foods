@@ -13,7 +13,7 @@ interface Order {
   id: string;
   items: { name: string; price: number; qty: number; emoji: string; vacuum?: boolean }[];
   shippingDetails: { firstName: string; lastName: string; email: string; phone: string; address: string; city: string; district: string };
-  paymentDetails: { method: string; status: string };
+  paymentDetails: { method: string; status: string; receiptUrl?: string };
   subtotal: number;
   deliveryCharge: number;
   total: number;
@@ -212,6 +212,19 @@ export default function OrderDetailPage() {
                 <span className="text-[#888]">Status</span>
                 <StatusBadge status={order.paymentDetails?.status || "pending"} />
               </div>
+              {order.paymentDetails?.receiptUrl && (
+                <div className="pt-3 mt-3 border-t border-gray-100">
+                  <span className="block text-[#888] mb-2">Bank Receipt</span>
+                  <a 
+                    href={order.paymentDetails.receiptUrl.endsWith('.pdf') ? order.paymentDetails.receiptUrl.replace('.pdf', '.png') : order.paymentDetails.receiptUrl} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center w-full px-4 py-2 bg-[#F4EFE6] hover:bg-[#E8DFCC] text-[#2C4631] text-sm font-semibold rounded-xl transition-colors"
+                  >
+                    View Payment Receipt
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 
