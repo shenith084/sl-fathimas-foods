@@ -84,7 +84,7 @@ export default function CartPage() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 px-8 py-5 border-b border-gray-100 text-[13px] font-bold text-[#222]">
+          <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-5 border-b border-gray-100 text-[13px] font-bold text-[#222]">
             <div className="col-span-6">Product</div>
             <div className="col-span-2 text-center">Price</div>
             <div className="col-span-2 text-center">Quantity</div>
@@ -97,9 +97,18 @@ export default function CartPage() {
               const itemPrice = item.price + (item.vacuum ? 50 : 0);
               const itemTotal = itemPrice * item.qty;
               return (
-                <div key={`${item.id}-${item.vacuum}`} className="grid grid-cols-12 gap-4 px-8 py-6 items-center hover:bg-gray-50/50 transition-colors">
+                <div key={`${item.id}-${item.vacuum}`} className="flex flex-col md:grid md:grid-cols-12 gap-4 md:gap-4 px-4 md:px-8 py-6 md:items-center hover:bg-gray-50/50 transition-colors relative">
+                  {/* Remove button on mobile top right */}
+                  <button
+                    onClick={() => removeItem(item.id, item.vacuum)}
+                    aria-label="Remove item"
+                    className="md:hidden absolute top-4 right-4 w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+
                   {/* Product Info */}
-                  <div className="col-span-6 flex items-center gap-6">
+                  <div className="md:col-span-6 flex items-start md:items-center gap-4 md:gap-6 pr-10 md:pr-0">
                     <div className="w-20 h-20 bg-gradient-to-br from-[#F4EFE6] to-[#FAF7F2] rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm border border-gray-100 overflow-hidden">
                       <span className="text-4xl drop-shadow-sm select-none">{item.emoji}</span>
                     </div>
@@ -120,36 +129,41 @@ export default function CartPage() {
                     </div>
                   </div>
 
-                  {/* Price */}
-                  <div className="col-span-2 text-center font-semibold text-[#222] text-[13px]">
-                    LKR {itemPrice.toLocaleString()}.00
-                  </div>
+                  {/* Mobile Layout Container for Price, Qty, Total */}
+                  <div className="flex flex-wrap items-center justify-between gap-y-4 mt-2 md:mt-0 md:contents">
+                    {/* Price */}
+                    <div className="w-1/2 md:w-auto md:col-span-2 text-left md:text-center font-sans font-bold text-[#222] text-[15px]">
+                      <div className="md:hidden text-xs text-gray-500 font-medium mb-1">Price</div>
+                      LKR {itemPrice.toLocaleString()}.00
+                    </div>
 
-                  {/* Quantity */}
-                  <div className="col-span-2 flex justify-center">
-                    <div className="flex items-center bg-white border border-gray-200 rounded-xl p-0.5 w-[100px]">
-                      <button onClick={() => updateQty(item.id, item.vacuum, -1)} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-[#222] transition-colors rounded-lg font-bold text-lg">
-                        −
-                      </button>
-                      <span className="flex-1 text-center font-bold text-[#222] text-[13px]">{item.qty}</span>
-                      <button onClick={() => updateQty(item.id, item.vacuum, 1)} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-[#222] transition-colors rounded-lg font-bold text-lg">
-                        +
+                    {/* Quantity */}
+                    <div className="w-1/2 md:w-auto md:col-span-2 flex justify-end md:justify-center">
+                      <div className="flex items-center bg-white border border-gray-200 rounded-xl p-0.5 w-[100px]">
+                        <button onClick={() => updateQty(item.id, item.vacuum, -1)} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-[#222] transition-colors rounded-lg font-bold text-lg">
+                          −
+                        </button>
+                        <span className="flex-1 text-center font-bold text-[#222] text-[13px]">{item.qty}</span>
+                        <button onClick={() => updateQty(item.id, item.vacuum, 1)} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-[#222] transition-colors rounded-lg font-bold text-lg">
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Total & Remove */}
+                    <div className="w-full md:w-auto md:col-span-2 flex items-center justify-between md:pl-4 pt-4 border-t border-gray-100 md:border-0 md:pt-0">
+                      <div className="md:hidden text-xs text-gray-500 font-medium">Total</div>
+                      <span className="font-sans font-bold text-[#D98C1F] text-[16px]">
+                        LKR {itemTotal.toLocaleString()}.00
+                      </span>
+                      <button
+                        onClick={() => removeItem(item.id, item.vacuum)}
+                        aria-label="Remove item"
+                        className="hidden md:flex w-8 h-8 rounded-full border border-gray-200 items-center justify-center text-gray-400 hover:border-red-200 hover:text-red-500 hover:bg-red-50 transition-all bg-white"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                  </div>
-
-                  {/* Total & Remove */}
-                  <div className="col-span-2 flex items-center justify-between pl-4">
-                    <span className="font-bold text-[#222] text-[13px]">
-                      LKR {itemTotal.toLocaleString()}.00
-                    </span>
-                    <button
-                      onClick={() => removeItem(item.id, item.vacuum)}
-                      aria-label="Remove item"
-                      className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-red-200 hover:text-red-500 hover:bg-red-50 transition-all bg-white"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
                   </div>
                 </div>
               );
@@ -171,7 +185,7 @@ export default function CartPage() {
                   <p className="text-[#666] text-[13px]">Enter your coupon code</p>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
                   value={coupon}
@@ -179,7 +193,7 @@ export default function CartPage() {
                   placeholder="Enter coupon code"
                   className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-[13px] font-medium focus:outline-none focus:border-[#2C4631] transition-colors bg-white shadow-sm"
                 />
-                <button className="bg-[#2C4631] hover:bg-[#1E3322] text-white text-[13px] font-bold px-8 py-3 rounded-xl transition-colors shadow-sm tracking-wide">
+                <button className="w-full sm:w-auto bg-[#2C4631] hover:bg-[#1E3322] text-white text-[13px] font-bold px-8 py-3 rounded-xl transition-colors shadow-sm tracking-wide">
                   APPLY
                 </button>
               </div>
@@ -199,19 +213,19 @@ export default function CartPage() {
             <h2 className="font-display font-bold text-[#222] text-xl mb-6">Order Summary</h2>
 
             <div className="space-y-4 mb-6">
-              <div className="flex justify-between text-[13px] font-medium text-[#555]">
+              <div className="flex justify-between text-[13px] font-medium text-[#555] items-center">
                 <span>Subtotal ({items.reduce((acc, i) => acc + i.qty, 0)} items)</span>
-                <span className="text-[#222] font-semibold">LKR {subtotal.toLocaleString()}.00</span>
+                <span className="text-[#222] font-sans font-bold text-[14px]">LKR {subtotal.toLocaleString()}.00</span>
               </div>
-              <div className="flex justify-between text-[13px] font-medium text-[#555]">
+              <div className="flex justify-between text-[13px] font-medium text-[#555] items-center">
                 <span>Delivery Fee</span>
-                <span className="text-[#222] font-semibold">LKR {deliveryCharge.toLocaleString()}.00</span>
+                <span className="text-[#222] font-sans font-bold text-[14px]">LKR {deliveryCharge.toLocaleString()}.00</span>
               </div>
             </div>
 
-            <div className="border-t border-gray-200/60 pt-5 pb-6 flex justify-between items-center font-display">
-              <span className="font-bold text-[#222] text-xl">Total</span>
-              <span className="font-bold text-[#D98C1F] text-2xl">LKR {total.toLocaleString()}.00</span>
+            <div className="border-t border-gray-200/60 pt-5 pb-6 flex justify-between items-center">
+              <span className="font-display font-bold text-[#222] text-xl">Total</span>
+              <span className="font-sans font-bold text-[#D98C1F] text-2xl">LKR {total.toLocaleString()}.00</span>
             </div>
 
             <Link

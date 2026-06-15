@@ -32,6 +32,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const [permissions, setPermissions] = useState<AppPermissions | null>(null);
   const [isAdminPrivileges, setIsAdminPrivileges] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -119,13 +120,18 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex text-[#222]">
-      {/* Sidebar - Fixed width 60 */}
-      <AdminSidebar permissions={permissions} isAdminPrivileges={isAdminPrivileges} />
+      {/* Sidebar */}
+      <AdminSidebar 
+        permissions={permissions} 
+        isAdminPrivileges={isAdminPrivileges} 
+        isOpen={mobileMenuOpen} 
+        onClose={() => setMobileMenuOpen(false)} 
+      />
 
-      {/* Main Content Area - Starts after sidebar */}
-      <div className="flex-1 ml-60 flex flex-col min-h-screen">
-        <AdminHeader title={pageTitle} />
-        <main className="flex-1 p-6 w-full mx-auto max-w-7xl">
+      {/* Main Content Area */}
+      <div className="flex-1 lg:ml-60 flex flex-col min-h-screen transition-all duration-300 w-full overflow-hidden">
+        <AdminHeader title={pageTitle} onMenuClick={() => setMobileMenuOpen(true)} />
+        <main className="flex-1 p-4 lg:p-6 w-full mx-auto max-w-7xl overflow-x-hidden">
           {children}
         </main>
       </div>

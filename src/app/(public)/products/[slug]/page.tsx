@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { products as fallbackProducts } from "@/lib/mockData";
+import { getProductBySlug } from "@/lib/services/productService";
 import ProductDetailClient from "./ProductDetailClient";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://slfathimasfoods.com";
@@ -11,7 +12,16 @@ export async function generateMetadata(
   const { slug } = await params;
 
   // Try Firestore first; fall back to mock data
-  const product = fallbackProducts.find((p) => p.slug === slug);
+  let product = null;
+  try {
+    product = await getProductBySlug(slug);
+  } catch (error) {
+    console.error("Error fetching product for metadata:", error);
+  }
+  
+  if (!product) {
+    product = fallbackProducts.find((p) => p.slug === slug);
+  }
 
   if (!product) {
     return {
@@ -20,9 +30,10 @@ export async function generateMetadata(
     };
   }
 
-  const title = `${product.name} — SL Fathima's Foods`;
-  const description = `${product.description} Made with natural ingredients. LKR ${product.price.toLocaleString()}. Island-wide delivery across Sri Lanka.`;
+  const title = product.seoTitle || `${product.name} — SL Fathima's Foods`;
+  const description = product.seoDescription || `${product.description || "Premium homemade food."} Made with natural ingredients. LKR ${product.price?.toLocaleString() || "0"}. Island-wide delivery across Sri Lanka.`;
   const productUrl = `${APP_URL}/products/${slug}`;
+  const ogImage = product.images && product.images.length > 0 ? product.images[0] : "/og-image.png";
 
   return {
     title: product.name,
@@ -36,7 +47,7 @@ export async function generateMetadata(
       siteName: "SL Fathima's Foods",
       images: [
         {
-          url: "/og-image.png",
+          url: ogImage,
           width: 1200,
           height: 630,
           alt: `${product.name} — SL Fathima's Foods`,
@@ -47,7 +58,7 @@ export async function generateMetadata(
       card: "summary_large_image",
       title,
       description,
-      images: ["/og-image.png"],
+      images: [ogImage],
     },
     keywords: [
       product.name,
@@ -70,5 +81,49 @@ export default async function ProductDetailPage(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  return <ProductDetailClient slug={slug} />;
+  
+  // Try to fetch for JSON-LD schema
+  let product = null;
+  try {
+    product = await getProductBySlug(slug);
+  } catch (error) {}
+  
+  if (!product) {
+    product = fallbackProducts.find((p) => p.slug === slug);
+  }
+
+  // Generate Product JSON-LD Schema
+  const jsonLd = product ? {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "image": product.images && product.images.length > 0 ? product.images[0] : `${APP_URL}/og-image.png`,
+    "description": product.description || "Premium homemade food product.",
+    "sku": product.sku || product.id,
+    "offers": {
+      "@type": "Offer",
+      "url": `${APP_URL}/products/${slug}`,
+      "priceCurrency": "LKR",
+      "price": product.price,
+      "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": (product.stock && product.stock > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "SL Fathima's Foods"
+      }
+    }
+  } : null;
+
+  return (
+    <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <ProductDetailClient slug={slug} />
+    </>
+  );
 }

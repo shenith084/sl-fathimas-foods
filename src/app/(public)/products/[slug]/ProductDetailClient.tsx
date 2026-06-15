@@ -208,13 +208,37 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-16">
           {/* Product Image Gallery */}
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-[#F4EFE6] to-[#FAF7F2] rounded-[2.5rem] aspect-square flex items-center justify-center shadow-[0_10px_40px_rgba(0,0,0,0.06)] relative overflow-hidden">
-              {product.badge && (
-                <span className="absolute top-6 left-6 bg-[#D98C1F] text-white text-[11px] font-bold px-4 py-2 rounded-full z-10 uppercase tracking-widest">
-                  {product.badge}
-                </span>
-              )}
+          {/* Product Image Gallery */}
+          <div className="flex flex-col-reverse md:flex-row gap-4">
+            {/* Gallery Thumbnails (Max 3) */}
+            {product.images && product.images.length > 1 ? (
+              <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-visible w-full md:w-20 flex-shrink-0">
+                <button className="hidden md:flex w-full h-8 bg-white border border-gray-100 rounded-lg items-center justify-center text-gray-500 hover:text-[#222] shadow-sm transition-colors mb-1">
+                  <ChevronRight className="w-4 h-4 -rotate-90" />
+                </button>
+                {product.images.slice(0, 3).map((img: string, i: number) => (
+                  <div 
+                    key={i} 
+                    onClick={() => setActiveImageIndex(i)}
+                    className={`flex-shrink-0 w-16 h-16 md:w-full md:h-20 bg-[#FAF7F2] rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-300 relative ${i === activeImageIndex ? "border-[#D98C1F] opacity-100 scale-105 shadow-md" : "border-transparent opacity-60 hover:opacity-100"}`}
+                  >
+                    <Image 
+                      src={img} 
+                      alt={`Thumbnail ${i+1}`} 
+                      fill
+                      sizes="80px"
+                      className="object-cover" 
+                    />
+                  </div>
+                ))}
+                <button className="hidden md:flex w-full h-8 bg-white border border-gray-100 rounded-lg items-center justify-center text-gray-500 hover:text-[#222] shadow-sm transition-colors mt-1">
+                  <ChevronRight className="w-4 h-4 rotate-90" />
+                </button>
+              </div>
+            ) : null}
+
+            {/* Main Image */}
+            <div className="flex-1 bg-[#2b1704] rounded-2xl aspect-square md:aspect-[4/5] lg:aspect-square flex items-center justify-center shadow-sm relative overflow-hidden">
               {product.images && product.images.length > 0 ? (
                 <Image 
                   src={product.images[activeImageIndex] || product.images[0]} 
@@ -227,130 +251,95 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
               ) : (
                 <span className="text-[12rem] select-none drop-shadow-xl" role="img" aria-label={product.name}>{product.emoji || "📦"}</span>
               )}
+              {/* Zoom icon placeholder */}
+              <button className="absolute bottom-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md text-[#222] hover:scale-105 transition-transform">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+              </button>
             </div>
-            
-            {/* Gallery Thumbnails */}
-            {product.images && product.images.length > 1 ? (
-              <div className="flex items-center gap-4 relative px-12">
-                <button className="absolute left-0 w-10 h-10 bg-white border border-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:text-[#222] shadow-sm transition-colors">
-                  <ChevronRight className="w-5 h-5 rotate-180" />
-                </button>
-                <div className="flex gap-4 overflow-hidden w-full">
-                  {product.images.map((img: string, i: number) => (
-                    <div 
-                      key={i} 
-                      onClick={() => setActiveImageIndex(i)}
-                      className={`flex-1 bg-[#FAF7F2] rounded-2xl aspect-square overflow-hidden cursor-pointer border-2 transition-all duration-300 relative ${i === activeImageIndex ? "border-[#D98C1F] opacity-100 scale-105 shadow-md" : "border-transparent opacity-50 hover:opacity-100"}`}
-                    >
-                      <Image 
-                        src={img} 
-                        alt={`Thumbnail ${i+1}`} 
-                        fill
-                        sizes="100px"
-                        className="object-cover" 
-                      />
-                    </div>
-                  ))}
-                </div>
-                <button className="absolute right-0 w-10 h-10 bg-white border border-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:text-[#222] shadow-sm transition-colors">
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            ) : (
-              (!product.images || product.images.length === 0) ? (
-                <div className="flex items-center gap-4 relative px-12">
-                  <button className="absolute left-0 w-10 h-10 bg-white border border-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:text-[#222] shadow-sm transition-colors">
-                    <ChevronRight className="w-5 h-5 rotate-180" />
-                  </button>
-                  <div className="flex gap-4 overflow-hidden w-full">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className={`flex-1 bg-gradient-to-br from-[#F4EFE6] to-[#FAF7F2] rounded-2xl aspect-square flex items-center justify-center cursor-pointer border-2 transition-colors ${i === 1 ? "border-[#D98C1F] scale-105 shadow-md" : "border-transparent opacity-50 hover:opacity-100"}`}>
-                        <span className="text-4xl">{product.emoji || "📦"}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <button className="absolute right-0 w-10 h-10 bg-white border border-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:text-[#222] shadow-sm transition-colors">
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-              ) : null
-            )}
           </div>
 
           {/* Product Info Right Column */}
-          <div className="pt-2">
-            <h1 className="font-display font-bold text-[#222] text-4xl mb-4">{product.name}</h1>
+          <div className="pt-2 flex flex-col">
+            {/* Badges */}
+            <div className="flex items-center gap-2 mb-4">
+              <span className="bg-[#D98C1F] text-white text-xs font-bold px-3 py-1 rounded-full">
+                {product.badge || "Best Seller"}
+              </span>
+              <span className="bg-[#F4EFE6] text-[#2C4631] text-xs font-bold px-3 py-1 rounded-full">
+                Handmade
+              </span>
+            </div>
 
-            <div className="mb-6">
+            <h1 className="font-display font-bold text-[#222] text-3xl md:text-4xl mb-4 leading-tight">{product.name}</h1>
+
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <StarRating rating={product.rating || 5.0} count={product.reviews || 128} />
+              <span className="text-[#888] text-sm font-medium">SKU: {product.id.slice(0,6).toUpperCase()}</span>
             </div>
 
             <div className="mb-6">
-              <span className="font-display font-bold text-[#D98C1F] text-[2rem]">
+              <span className="font-sans font-bold text-[#2C4631] text-[2rem] tracking-tight">
                 LKR {product.price.toLocaleString()}.00
               </span>
             </div>
 
-            {(product.stock_count ?? product.stock ?? 0) <= 0 ? (
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center">
-                  <span className="w-3 h-3 text-red-600 flex items-center justify-center font-bold text-xs">!</span>
-                </div>
-                <span className="text-sm font-semibold text-red-600">Out of Stock</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-green-600" strokeWidth={3} />
-                </div>
-                <span className="text-sm font-semibold text-green-600">In Stock</span>
-              </div>
-            )}
-
-            <p className="text-[#555] text-[15px] leading-relaxed mb-8">
-              {product.description || "Everything you need to make delicious, authentic biriyani at home. Made with premium ingredients and traditional spices."}
+            <p className="text-[#555] text-sm md:text-[15px] leading-relaxed mb-8">
+              {product.description || "Our signature pickle made with fresh ingredients, handpicked spices and traditional recipes for an authentic taste."}
             </p>
 
-            <div className="mb-8">
-              <h3 className="font-display font-bold text-[#222] text-sm mb-4">This Kit Contains:</h3>
-              <ul className="space-y-3">
-                <li className="flex items-center gap-3 text-[#555] text-sm"><Check className="w-4 h-4 text-gray-400" /> Biriyani Masala</li>
-                <li className="flex items-center gap-3 text-[#555] text-sm"><Check className="w-4 h-4 text-gray-400" /> Fried Onions</li>
-                <li className="flex items-center gap-3 text-[#555] text-sm"><Check className="w-4 h-4 text-gray-400" /> Specialty Spice Mix</li>
-                <li className="flex items-center gap-3 text-[#555] text-sm"><Check className="w-4 h-4 text-gray-400" /> Recipe Card</li>
-              </ul>
-            </div>
-
-            <div className="mb-8">
-              <h3 className="font-display font-bold text-[#222] text-sm mb-4">Quantity:</h3>
-              <div className="inline-flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
-                <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-[#222] hover:bg-gray-50 rounded-lg transition-colors font-bold text-lg">−</button>
-                <span className="w-8 text-center font-bold text-[#222] text-sm">{qty}</span>
-                <button onClick={() => setQty(qty + 1)} className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-[#222] hover:bg-gray-50 rounded-lg transition-colors font-bold text-lg">+</button>
+            {/* Feature Badges Row */}
+            <div className="flex flex-wrap items-center gap-4 py-4 px-6 border border-gray-100 rounded-xl mb-8 shadow-sm bg-white">
+              <div className="flex items-center gap-2 text-[#555]">
+                <div className="text-[#2C4631]"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg></div>
+                <span className="text-[11px] font-medium leading-tight">100% Natural<br/>Ingredients</span>
+              </div>
+              <div className="w-px h-8 bg-gray-100 hidden sm:block"></div>
+              <div className="flex items-center gap-2 text-[#555]">
+                <div className="text-[#2C4631]"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg></div>
+                <span className="text-[11px] font-medium leading-tight">No Artificial<br/>Preservatives</span>
+              </div>
+              <div className="w-px h-8 bg-gray-100 hidden lg:block"></div>
+              <div className="flex items-center gap-2 text-[#555]">
+                <div className="text-[#2C4631]">✋</div>
+                <span className="text-[11px] font-medium leading-tight">Handmade<br/>in Sri Lanka</span>
+              </div>
+              <div className="w-px h-8 bg-gray-100 hidden sm:block"></div>
+              <div className="flex items-center gap-2 text-[#555]">
+                <div className="text-[#2C4631]">🛡️</div>
+                <span className="text-[11px] font-medium leading-tight">Premium<br/>Quality</span>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 mb-10">
+            <div className="mb-6">
+              <h3 className="text-[#555] text-xs font-semibold mb-2">Quantity</h3>
+              <div className="inline-flex items-center bg-white border border-gray-200 rounded-lg shadow-sm">
+                <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-[#222] hover:bg-gray-50 rounded-l-lg transition-colors font-bold text-lg border-r border-gray-200">−</button>
+                <input type="number" value={qty} onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))} className="w-12 text-center font-bold text-[#222] text-sm focus:outline-none appearance-none bg-transparent" />
+                <button onClick={() => setQty(qty + 1)} className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-[#222] hover:bg-gray-50 rounded-r-lg transition-colors font-bold text-lg border-l border-gray-200">+</button>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <button
                 onClick={handleAddToCart}
                 disabled={added || (product.stock_count ?? product.stock ?? 0) <= 0}
-                className={`w-full text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 ${
+                className={`flex-1 text-white font-bold py-3.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 ${
                   added 
                     ? "bg-[#2C4631]" 
                     : (product.stock_count ?? product.stock ?? 0) <= 0 
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none" 
-                      : "bg-[#D98C1F] hover:bg-[#B8740F]"
+                      : "bg-[#1E3322] hover:bg-[#152418]"
                 }`}
               >
                 {added ? (
                   <>
                     <Check className="w-5 h-5" />
-                    ADDED TO CART!
+                    ADDED!
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="w-5 h-5" />
-                    {(product.stock_count ?? product.stock ?? 0) <= 0 ? "OUT OF STOCK" : "ADD TO CART"}
+                    {(product.stock_count ?? product.stock ?? 0) <= 0 ? "OUT OF STOCK" : "Add to Cart"}
                   </>
                 )}
               </button>
@@ -358,149 +347,120 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                 <Link
                   href="/checkout"
                   onClick={handleAddToCart}
-                  className="w-full bg-[#2C4631] hover:bg-[#1E3322] text-white font-bold py-3 rounded-xl transition-colors shadow-md flex items-center justify-center text-center"
+                  className="flex-1 bg-transparent border border-[#D98C1F] text-[#D98C1F] hover:bg-[#FAF7F2] font-bold py-3.5 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 text-center"
                 >
-                  BUY NOW
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  Buy Now
                 </Link>
               )}
             </div>
 
-            {/* 4 Horizontal Trust Badges */}
-            <div className="grid grid-cols-2 gap-y-6 gap-x-4">
-              <div className="flex items-center gap-3 text-[#555]">
-                <div className="w-8 h-8 rounded-full bg-[#FAF7F2] flex items-center justify-center text-[#2C4631]">🌿</div>
-                <span className="text-sm font-medium">100% Homemade</span>
-              </div>
-              <div className="flex items-center gap-3 text-[#555]">
-                <div className="w-8 h-8 rounded-full bg-[#FAF7F2] flex items-center justify-center text-[#2C4631]">☪️</div>
-                <span className="text-sm font-medium">Halal Certified</span>
-              </div>
-              <div className="flex items-center gap-3 text-[#555]">
-                <div className="w-8 h-8 rounded-full bg-[#FAF7F2] flex items-center justify-center text-[#2C4631]">✨</div>
-                <span className="text-sm font-medium">No Preservatives</span>
-              </div>
-              <div className="flex items-center gap-3 text-[#555]">
-                <div className="w-8 h-8 rounded-full bg-[#FAF7F2] flex items-center justify-center text-[#2C4631]">🚚</div>
-                <span className="text-sm font-medium">Islandwide Delivery</span>
-              </div>
+            {/* Share row */}
+            <div className="flex items-center justify-end gap-3 mt-auto pt-4">
+              <span className="text-[#888] text-xs font-bold tracking-wide uppercase mr-2">Share:</span>
+              <button className="w-8 h-8 rounded-full border border-gray-200 bg-white shadow-sm flex items-center justify-center text-[#555] hover:text-[#1877F2] hover:border-[#1877F2] transition-colors">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              </button>
+              <button className="w-8 h-8 rounded-full border border-gray-200 bg-white shadow-sm flex items-center justify-center text-[#555] hover:text-[#25D366] hover:border-[#25D366] transition-colors">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              </button>
+              <button className="w-8 h-8 rounded-full border border-gray-200 bg-white shadow-sm flex items-center justify-center text-[#555] hover:text-[#E1306C] hover:border-[#E1306C] transition-colors">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Product Details Tabs Section */}
-        <div className="mt-16 pt-10 border-t border-gray-200">
-          <div className="flex flex-wrap gap-8 border-b border-gray-200 mb-10">
-            {["Description", "Ingredients", "How to Use", `Reviews (${product.reviews || 128})`, "Delivery Info"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`pb-4 text-[15px] font-semibold transition-colors relative ${activeTab === tab ? "text-[#222]" : "text-[#888] hover:text-[#555]"}`}
-              >
-                {tab}
-                {activeTab === tab && (
-                  <span className="absolute bottom-[-1px] left-0 w-full h-[3px] bg-[#D98C1F] rounded-t-full"></span>
-                )}
-              </button>
-            ))}
+        <div className="mt-16">
+          <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-10 shadow-sm">
+            <div className="flex flex-wrap gap-8 border-b border-gray-100 mb-10 pb-4">
+              {["Description", "Ingredients", `Reviews (${product.reviews || 120})`, "Delivery & Returns"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`text-[15px] font-bold transition-colors relative ${activeTab === tab ? "text-[#2C4631]" : "text-[#888] hover:text-[#555]"}`}
+                >
+                  {tab}
+                  {activeTab === tab && (
+                    <span className="absolute -bottom-[17px] left-0 w-full h-[2px] bg-[#2C4631]"></span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === "Description" && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+                <div className="lg:col-span-2 space-y-8">
+                  <p className="text-[#555] text-[15px] leading-relaxed">
+                    {product.name} is a perfect blend of fresh ingredients and aromatic spices, crafted using traditional methods to deliver a rich and authentic flavor.
+                  </p>
+                  
+                  <ul className="space-y-4">
+                    <li className="flex items-center gap-3 text-[#222] font-medium text-[15px]">
+                      <div className="w-5 h-5 rounded-full bg-[#2C4631] flex items-center justify-center text-white"><Check className="w-3 h-3" strokeWidth={3} /></div>
+                      Made with fresh ingredients
+                    </li>
+                    <li className="flex items-center gap-3 text-[#222] font-medium text-[15px]">
+                      <div className="w-5 h-5 rounded-full bg-[#2C4631] flex items-center justify-center text-white"><Check className="w-3 h-3" strokeWidth={3} /></div>
+                      Blended with traditional spices
+                    </li>
+                    <li className="flex items-center gap-3 text-[#222] font-medium text-[15px]">
+                      <div className="w-5 h-5 rounded-full bg-[#2C4631] flex items-center justify-center text-white"><Check className="w-3 h-3" strokeWidth={3} /></div>
+                      No artificial colors or preservatives
+                    </li>
+                    <li className="flex items-center gap-3 text-[#222] font-medium text-[15px]">
+                      <div className="w-5 h-5 rounded-full bg-[#2C4631] flex items-center justify-center text-white"><Check className="w-3 h-3" strokeWidth={3} /></div>
+                      Perfect with rice, roti, hoppers and more
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Specs Box */}
+                <div className="bg-[#EEF1EB] rounded-2xl p-8 border border-[#E2E8DC]">
+                  <div className="space-y-4">
+                    <div className="flex gap-4">
+                      <span className="text-[#555] font-semibold text-sm w-24">Net Weight:</span>
+                      <span className="text-[#222] text-sm">{product.weight || "500g"}</span>
+                    </div>
+                    <div className="flex gap-4">
+                      <span className="text-[#555] font-semibold text-sm w-24">Shelf Life:</span>
+                      <span className="text-[#222] text-sm">{product.shelfLife || "6 Months"}</span>
+                    </div>
+                    <div className="flex gap-4">
+                      <span className="text-[#555] font-semibold text-sm w-24">Storage:</span>
+                      <span className="text-[#222] text-sm leading-tight">Store in a cool, dry place. Refrigerate after opening.</span>
+                    </div>
+                    <div className="flex gap-4 items-center pt-2">
+                      <span className="text-[#555] font-semibold text-sm w-24">Spice Level:</span>
+                      <div className="flex gap-1 text-red-500">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.44 2.1c-.24.08-.4.32-.4.6 0 .4 1.35 3.39 1.35 5.56 0 1.94-1.28 3.59-3.07 4.09-.56.16-1.12.16-1.68 0C6.85 11.85 5.57 10.2 5.57 8.26c0-2.17 1.35-5.16 1.35-5.56 0-.28-.16-.52-.4-.6-.24-.08-.52 0-.68.24-.12.16-2.03 3.66-2.03 6.64C3.81 12.89 6.8 16 10.71 16h2.58c3.91 0 6.9-3.11 6.9-7.02 0-2.98-1.91-6.48-2.03-6.64-.16-.24-.44-.32-.68-.24M12 18c-2.31 0-4.47-.72-6.24-1.95.84 2.87 3.55 5 6.78 5s5.94-2.13 6.78-5C17.55 17.28 15.39 18 13.08 18H12z"/></svg>
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.44 2.1c-.24.08-.4.32-.4.6 0 .4 1.35 3.39 1.35 5.56 0 1.94-1.28 3.59-3.07 4.09-.56.16-1.12.16-1.68 0C6.85 11.85 5.57 10.2 5.57 8.26c0-2.17 1.35-5.16 1.35-5.56 0-.28-.16-.52-.4-.6-.24-.08-.52 0-.68.24-.12.16-2.03 3.66-2.03 6.64C3.81 12.89 6.8 16 10.71 16h2.58c3.91 0 6.9-3.11 6.9-7.02 0-2.98-1.91-6.48-2.03-6.64-.16-.24-.44-.32-.68-.24M12 18c-2.31 0-4.47-.72-6.24-1.95.84 2.87 3.55 5 6.78 5s5.94-2.13 6.78-5C17.55 17.28 15.39 18 13.08 18H12z"/></svg>
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.44 2.1c-.24.08-.4.32-.4.6 0 .4 1.35 3.39 1.35 5.56 0 1.94-1.28 3.59-3.07 4.09-.56.16-1.12.16-1.68 0C6.85 11.85 5.57 10.2 5.57 8.26c0-2.17 1.35-5.16 1.35-5.56 0-.28-.16-.52-.4-.6-.24-.08-.52 0-.68.24-.12.16-2.03 3.66-2.03 6.64C3.81 12.89 6.8 16 10.71 16h2.58c3.91 0 6.9-3.11 6.9-7.02 0-2.98-1.91-6.48-2.03-6.64-.16-.24-.44-.32-.68-.24M12 18c-2.31 0-4.47-.72-6.24-1.95.84 2.87 3.55 5 6.78 5s5.94-2.13 6.78-5C17.55 17.28 15.39 18 13.08 18H12z"/></svg>
+                        <svg className="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12.44 2.1c-.24.08-.4.32-.4.6 0 .4 1.35 3.39 1.35 5.56 0 1.94-1.28 3.59-3.07 4.09-.56.16-1.12.16-1.68 0C6.85 11.85 5.57 10.2 5.57 8.26c0-2.17 1.35-5.16 1.35-5.56 0-.28-.16-.52-.4-.6-.24-.08-.52 0-.68.24-.12.16-2.03 3.66-2.03 6.64C3.81 12.89 6.8 16 10.71 16h2.58c3.91 0 6.9-3.11 6.9-7.02 0-2.98-1.91-6.48-2.03-6.64-.16-.24-.44-.32-.68-.24M12 18c-2.31 0-4.47-.72-6.24-1.95.84 2.87 3.55 5 6.78 5s5.94-2.13 6.78-5C17.55 17.28 15.39 18 13.08 18H12z"/></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {activeTab === "Ingredients" && (
+              <div className="py-8">
+                <h3 className="font-display font-bold text-[#222] text-xl mb-6">Ingredients List</h3>
+                <p className="text-[#555] leading-relaxed max-w-3xl">
+                  {product.ingredients || "Made with 100% natural, locally sourced ingredients. No artificial colors, flavors, or preservatives added. Please see the product packaging for a full detailed list."}
+                </p>
+              </div>
+            )}
+
+            {activeTab !== "Description" && activeTab !== "Ingredients" && (
+              <div className="py-16 text-center text-[#888]">
+                <span className="text-5xl block mb-4">✨</span>
+                <p>Content for {activeTab} will be available soon.</p>
+              </div>
+            )}
           </div>
-
-          {activeTab === "Description" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-              <div className="space-y-12">
-                <div className="space-y-6 text-[#555] text-[15px] leading-relaxed">
-                  <p>
-                    Our {product.name} is carefully curated to help you prepare authentic, flavorful meals with ease.
-                  </p>
-                  <p>
-                    We use only the finest natural ingredients, blended with traditional recipes passed down through generations.
-                  </p>
-                </div>
-                
-                {/* 4 Feature Icons */}
-                <div className="grid grid-cols-4 gap-4">
-                  <div className="flex flex-col items-center text-center gap-3">
-                    <div className="w-14 h-14 rounded-full border border-gray-200 flex items-center justify-center text-[#2C4631]">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </div>
-                    <div>
-                      <h4 className="text-[13px] font-bold text-[#222]">Time Saving</h4>
-                      <p className="text-[11px] text-[#888]">Easy to Cook</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-center text-center gap-3">
-                    <div className="w-14 h-14 rounded-full border border-gray-200 flex items-center justify-center text-[#2C4631]">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
-                    </div>
-                    <div>
-                      <h4 className="text-[13px] font-bold text-[#222]">Premium</h4>
-                      <p className="text-[11px] text-[#888]">Quality</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-center text-center gap-3">
-                    <div className="w-14 h-14 rounded-full border border-gray-200 flex items-center justify-center text-[#2C4631]">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
-                    </div>
-                    <div>
-                      <h4 className="text-[13px] font-bold text-[#222]">Authentic</h4>
-                      <p className="text-[11px] text-[#888]">Taste</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-center text-center gap-3">
-                    <div className="w-14 h-14 rounded-full border border-gray-200 flex items-center justify-center text-[#2C4631]">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                    </div>
-                    <div>
-                      <h4 className="text-[13px] font-bold text-[#222]">Made with</h4>
-                      <p className="text-[11px] text-[#888]">Love</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Product Information Table Box */}
-              <div className="bg-[#FAF7F2] rounded-3xl p-8 lg:p-10">
-                <h3 className="font-display font-bold text-[#222] text-lg mb-8">Product Information</h3>
-                <div className="space-y-6">
-                  <div className="flex justify-between border-b border-gray-200/50 pb-4">
-                    <span className="text-[#555] font-medium text-sm">Net Weight</span>
-                    <span className="text-[#222] font-semibold text-sm">{product.weight || "500g"}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-200/50 pb-4">
-                    <span className="text-[#555] font-medium text-sm">Shelf Life</span>
-                    <span className="text-[#222] font-semibold text-sm">{product.shelfLife || "6 Months"}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-200/50 pb-4">
-                    <span className="text-[#555] font-medium text-sm">Storage</span>
-                    <span className="text-[#222] font-semibold text-sm">Store in a cool, dry place</span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-200/50 pb-4">
-                    <span className="text-[#555] font-medium text-sm">Servings</span>
-                    <span className="text-[#222] font-semibold text-sm">4 - 5 Persons</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#555] font-medium text-sm">Origin</span>
-                    <span className="text-[#222] font-semibold text-sm">Sri Lanka</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {activeTab === "Ingredients" && (
-            <div className="py-8">
-              <h3 className="font-display font-bold text-[#222] text-xl mb-6">Ingredients List</h3>
-              <p className="text-[#555] leading-relaxed max-w-3xl">
-                {product.ingredients || "Made with 100% natural, locally sourced ingredients. No artificial colors, flavors, or preservatives added. Please see the product packaging for a full detailed list."}
-              </p>
-            </div>
-          )}
-
-          {activeTab !== "Description" && activeTab !== "Ingredients" && (
-            <div className="py-16 text-center text-[#888]">
-              <span className="text-5xl block mb-4">✨</span>
-              <p>Content for {activeTab} will be available soon.</p>
-            </div>
-          )}
         </div>
 
         {/* Reviews Section */}
@@ -565,30 +525,43 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
         {/* You May Also Like */}
         <div className="mt-16">
           <h2 className="font-display font-bold text-[#222] text-2xl mb-6">
-            You May Also <span className="text-[#D98C1F]">Like</span>
+            You May Also Like
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {related.map((p) => (
-              <Link key={p.id} href={`/products/${p.slug}`} className="bg-white rounded-2xl overflow-hidden shadow-sm group block hover:shadow-md transition-shadow">
-                <div className="h-36 bg-gradient-to-br from-[#F4EFE6] to-[#FAF7F2] flex items-center justify-center overflow-hidden relative">
-                  {p.images && p.images.length > 0 ? (
-                    <Image 
-                      src={p.images[0]} 
-                      alt={p.name}
-                      fill
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <span className="text-6xl group-hover:scale-110 transition-transform duration-300 select-none" role="img" aria-label={p.name}>{p.emoji || "📦"}</span>
-                  )}
-                </div>
-                <div className="p-3">
-                  <h3 className="font-display font-semibold text-[#222] text-sm line-clamp-2 mb-1 group-hover:text-[#D98C1F] transition-colors">{p.name}</h3>
-                  <span className="font-bold text-[#D98C1F] text-sm">LKR {p.price.toLocaleString()}.00</span>
-                </div>
-              </Link>
-            ))}
+          <div className="relative group">
+            <button className="absolute -left-5 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-[#222] hover:border-gray-300 shadow-sm transition-colors z-10 opacity-0 group-hover:opacity-100">
+              <ChevronRight className="w-5 h-5 rotate-180" />
+            </button>
+            <div className="flex gap-4 overflow-x-auto pb-4 snap-x [&::-webkit-scrollbar]:hidden">
+              {related.map((p) => (
+                <Link key={p.id} href={`/products/${p.slug}`} className="min-w-[200px] md:min-w-[220px] flex-shrink-0 bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group snap-start block">
+                  <div className="h-40 bg-gradient-to-br from-[#F4EFE6] to-[#FAF7F2] flex items-center justify-center overflow-hidden relative p-4">
+                    {p.images && p.images.length > 0 ? (
+                      <Image 
+                        src={p.images[0]} 
+                        alt={p.name}
+                        fill
+                        sizes="200px"
+                        className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <span className="text-6xl group-hover:scale-110 transition-transform duration-300 select-none" role="img" aria-label={p.name}>{p.emoji || "📦"}</span>
+                    )}
+                  </div>
+                  <div className="p-4 relative">
+                    <h3 className="font-bold text-[#222] text-sm line-clamp-1 mb-1 group-hover:text-[#2C4631] transition-colors">{p.name}</h3>
+                    <p className="text-[#888] text-[11px] mb-2">{p.weight || "500g"}</p>
+                    <span className="font-bold text-[#222] text-sm block">LKR {p.price.toLocaleString()}.00</span>
+                    
+                    <div className="absolute right-4 bottom-4 w-8 h-8 rounded-full bg-[#1E3322] flex items-center justify-center text-white shadow-sm hover:bg-[#2C4631] transition-colors">
+                      <ShoppingCart className="w-4 h-4" />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <button className="absolute -right-5 top-1/2 -translate-y-1/2 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-[#222] hover:border-gray-300 shadow-sm transition-colors z-10 opacity-0 group-hover:opacity-100">
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>

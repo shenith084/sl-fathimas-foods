@@ -100,7 +100,7 @@ export default function HeroSection() {
                   alt="SL Fathima's Foods Premium Products"
                   fill
                   sizes="(max-width: 768px) 100vw, 550px"
-                  className="object-contain drop-shadow-2xl"
+                  className="object-contain drop-shadow-md"
                   priority
                 />
               </div>

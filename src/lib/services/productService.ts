@@ -19,6 +19,8 @@ export interface AdminProduct {
   stock_count: number;
   availability: "in_stock" | "out_of_stock" | "pre_order";
   images?: string[];
+  seoTitle?: string;
+  seoDescription?: string;
   deleted_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

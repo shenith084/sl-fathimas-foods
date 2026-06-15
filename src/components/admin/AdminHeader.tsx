@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase/client";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { Bell, LogOut, User } from "lucide-react";
+import { Bell, LogOut, User, Menu } from "lucide-react";
 
-export default function AdminHeader({ title }: { title?: string }) {
+export default function AdminHeader({ title, onMenuClick }: { title?: string, onMenuClick?: () => void }) {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -25,7 +25,13 @@ export default function AdminHeader({ title }: { title?: string }) {
 
   return (
     <header className="h-14 bg-transparent flex items-center justify-between px-6 pt-2 sticky top-0 z-30">
-      <div className="flex flex-col">
+      <div className="flex items-center gap-3">
+        <button 
+          onClick={onMenuClick}
+          className="lg:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
         {title && (
           <h1 className="text-[#222] font-bold text-lg">{title}</h1>
         )}

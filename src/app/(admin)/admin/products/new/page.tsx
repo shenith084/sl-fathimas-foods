@@ -16,6 +16,7 @@ export default function NewProductPage() {
     name: "", slug: "", category: "", price: "", weight: "", shelfLife: "",
     ingredients: "", description: "", emoji: "🍛", badge: "",
     stock_count: "10", availability: "in_stock", customizable: false,
+    seoTitle: "", seoDescription: "",
     imageFiles: [] as File[],
   });
 
@@ -42,6 +43,8 @@ export default function NewProductPage() {
           stock_count: Number(form.stock_count),
           badge: form.badge || null,
           slug: form.slug || generateSlug(form.name),
+          seoTitle: form.seoTitle || null,
+          seoDescription: form.seoDescription || null,
           rating: 5.0,
           reviews: 0,
         }),
@@ -257,6 +260,31 @@ export default function NewProductPage() {
                   <option value="Popular">Popular</option>
                   <option value="Limited">Limited</option>
                 </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h3 className="font-semibold text-[#222] mb-4">SEO Settings (Optional)</h3>
+            <div className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-[#555] mb-1.5">SEO Title</label>
+                <input
+                  value={form.seoTitle}
+                  onChange={(e) => update("seoTitle", e.target.value)}
+                  placeholder="e.g. Buy Premium Prawn Pickle Online"
+                  className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#D98C1F] focus:ring-2 focus:ring-[#D98C1F]/20 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[#555] mb-1.5">SEO Description</label>
+                <textarea
+                  rows={3}
+                  value={form.seoDescription}
+                  onChange={(e) => update("seoDescription", e.target.value)}
+                  placeholder="Short, punchy description for Google Search results..."
+                  className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#D98C1F] focus:ring-2 focus:ring-[#D98C1F]/20 transition-colors resize-none"
+                />
               </div>
             </div>
           </div>

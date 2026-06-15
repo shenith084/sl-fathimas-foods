@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Package, ShoppingCart, Users, BarChart2,
-  Star, FileText, Settings, Shield, Box, ChevronRight, MessageSquare,
+  Star, FileText, Settings, Shield, Box, ChevronRight, MessageSquare, X
 } from "lucide-react";
 import { AppPermissions } from "@/lib/services/roleService";
 
@@ -27,9 +27,11 @@ const navItems = [
 interface AdminSidebarProps {
   permissions: AppPermissions | null;
   isAdminPrivileges: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function AdminSidebar({ permissions, isAdminPrivileges }: AdminSidebarProps) {
+export default function AdminSidebar({ permissions, isAdminPrivileges, isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
 
   // Decide if a nav item should be shown
@@ -46,19 +48,31 @@ export default function AdminSidebar({ permissions, isAdminPrivileges }: AdminSi
   const visibleItems = navItems.filter(item => canSee(item.permissionKey));
 
   return (
-    <aside className="fixed top-0 left-0 h-screen w-60 bg-[#18181A] flex flex-col z-40 shadow-2xl border-r border-white/5">
-      {/* Logo */}
-      <div className="px-6 py-5 border-b border-white/5 flex flex-col items-center justify-center">
-        <Link href="/admin/dashboard" className="flex flex-col items-center gap-2">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg overflow-hidden bg-black border border-[#D98C1F]/20 relative">
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
-          </div>
-          <div className="text-center">
-            <p className="text-white font-bold text-sm leading-none mb-0.5 tracking-wide">Fathima&apos;s</p>
-            <p className="text-[#D98C1F] text-[9px] font-bold tracking-[0.2em] uppercase">Admin Panel</p>
-          </div>
-        </Link>
-      </div>
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+          onClick={onClose}
+        />
+      )}
+      
+      <aside className={`fixed top-0 left-0 h-screen w-60 bg-[#18181A] flex flex-col z-50 shadow-2xl border-r border-white/5 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        {/* Logo */}
+        <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
+          <Link href="/admin/dashboard" className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg overflow-hidden bg-black border border-[#D98C1F]/20 relative">
+              <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-white font-bold text-sm leading-none mb-0.5 tracking-wide">Fathima&apos;s</span>
+              <span className="text-[#D98C1F] text-[9px] font-bold tracking-[0.2em] uppercase">Admin Panel</span>
+            </div>
+          </Link>
+          <button onClick={onClose} className="lg:hidden p-1 text-gray-400 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 overflow-y-auto">
@@ -98,5 +112,6 @@ export default function AdminSidebar({ permissions, isAdminPrivileges }: AdminSi
         </Link>
       </div>
     </aside>
+    </>
   );
 }

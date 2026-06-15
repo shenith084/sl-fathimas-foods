@@ -18,6 +18,7 @@ export default function EditProductPage() {
     name: "", slug: "", category: "", price: "", weight: "", shelfLife: "",
     ingredients: "", description: "", emoji: "🍛", badge: "",
     stock_count: "10", availability: "in_stock", customizable: false,
+    seoTitle: "", seoDescription: "",
     images: [] as string[],
     imageFiles: [] as File[],
   });
@@ -45,6 +46,8 @@ export default function EditProductPage() {
             stock_count: String(p.stock_count ?? 0),
             availability: p.availability || "in_stock",
             customizable: p.customizable || false,
+            seoTitle: p.seoTitle || "",
+            seoDescription: p.seoDescription || "",
           }));
         }
       })
@@ -98,6 +101,8 @@ export default function EditProductPage() {
           price: Number(form.price),
           stock_count: Number(form.stock_count),
           badge: form.badge || null,
+          seoTitle: form.seoTitle || null,
+          seoDescription: form.seoDescription || null,
         }),
       });
       const data = await res.json();
@@ -291,6 +296,31 @@ export default function EditProductPage() {
                   <option value="Popular">Popular</option>
                   <option value="Limited">Limited</option>
                 </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h3 className="font-semibold text-[#222] mb-4">SEO Settings (Optional)</h3>
+            <div className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-[#555] mb-1.5">SEO Title</label>
+                <input
+                  value={form.seoTitle}
+                  onChange={(e) => update("seoTitle", e.target.value)}
+                  placeholder="e.g. Buy Premium Prawn Pickle Online"
+                  className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#D98C1F] bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[#555] mb-1.5">SEO Description</label>
+                <textarea
+                  rows={3}
+                  value={form.seoDescription}
+                  onChange={(e) => update("seoDescription", e.target.value)}
+                  placeholder="Short, punchy description for Google Search results..."
+                  className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#D98C1F] resize-none"
+                />
               </div>
             </div>
           </div>

@@ -108,7 +108,7 @@ function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="product-card flex-shrink-0 w-[200px] sm:w-[220px] bg-white rounded-lg overflow-hidden shadow-card group cursor-pointer">
+    <div className="product-card flex-shrink-0 w-[200px] sm:w-[220px] bg-white rounded-xl overflow-hidden shadow-card group cursor-pointer">
       {/* Image area */}
       <div className="relative bg-gradient-to-br from-[#F4EFE6] to-[#FAF7F2] h-44 flex items-center justify-center overflow-hidden">
         {product.badge && (
@@ -163,7 +163,7 @@ function ProductCard({ product }: { product: Product }) {
         {/* Price & Cart */}
         <div className="flex items-center justify-between">
           <div>
-            <span className="font-display font-bold text-[#D98C1F] text-base">
+            <span className="font-sans font-bold tracking-tight text-[#D98C1F] text-base">
               LKR {product.price.toLocaleString()}.00
             </span>
           </div>

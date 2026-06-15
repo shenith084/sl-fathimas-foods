@@ -50,9 +50,11 @@ const config: Config = {
           "linear-gradient(180deg, #1F1F1F 0%, #111111 100%)",
       },
       boxShadow: {
-        card: "0 2px 20px rgba(0,0,0,0.08)",
+        sm: "0 1px 2px rgba(0,0,0,0.01)",
+        DEFAULT: "0 1px 3px rgba(0,0,0,0.015)",
+        card: "0 2px 8px rgba(0,0,0,0.02)",
         "card-hover": "0 8px 40px rgba(0,0,0,0.15)",
-        product: "0 4px 24px rgba(85,107,79,0.15)",
+        product: "0 2px 8px rgba(85,107,79,0.04)",
         glow: "0 0 30px rgba(217,140,31,0.25)",
       },
       animation: {

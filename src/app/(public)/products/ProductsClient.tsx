@@ -241,7 +241,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
             <div className="sticky top-24 space-y-6">
               
               {/* Categories */}
-              <div className="bg-[#FAF7F2]/50 rounded-2xl p-5 shadow-sm border border-gray-100">
+              <div className="bg-[#FAF7F2]/50 rounded-xl p-5 shadow-sm border border-gray-100">
                 <h2 className="font-display font-bold text-[#222] text-[15px] mb-4">
                   Categories
                 </h2>
@@ -249,7 +249,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                   <li>
                     <button
                       onClick={() => handleCategorySelect("All")}
-                      className={`w-full text-left px-4 py-2.5 rounded-xl text-[13px] font-medium transition-colors flex justify-between items-center ${
+                      className={`w-full text-left px-4 py-2.5 rounded-lg text-[13px] font-medium transition-colors flex justify-between items-center ${
                         activeCategorySlug === "All"
                           ? "bg-[#F4EFE6] text-[#222]"
                           : "text-[#555] hover:bg-[#F4EFE6] hover:text-[#222]"
@@ -277,7 +277,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                               handleCategorySelect(cat.slug);
                             }
                           }}
-                          className={`w-full text-left px-4 py-2.5 rounded-xl text-[13px] font-medium transition-colors flex justify-between items-center ${
+                          className={`w-full text-left px-4 py-2.5 rounded-lg text-[13px] font-medium transition-colors flex justify-between items-center ${
                             isActive
                               ? "bg-[#F4EFE6] text-[#222]"
                               : "text-[#555] hover:bg-[#F4EFE6] hover:text-[#222]"
@@ -304,7 +304,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                                 <li key={sub.id}>
                                   <button
                                     onClick={() => handleCategorySelect(sub.slug)}
-                                    className={`w-full text-left px-4 py-2 rounded-xl text-[12px] font-medium transition-colors flex justify-between items-center ${
+                                    className={`w-full text-left px-4 py-2 rounded-lg text-[12px] font-medium transition-colors flex justify-between items-center ${
                                       isSubActive
                                         ? "bg-[#F4EFE6] text-[#2C4631]"
                                         : "text-[#666] hover:bg-[#F4EFE6] hover:text-[#2C4631]"
@@ -325,7 +325,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
               </div>
 
               {/* Price Filter */}
-              <div className="bg-[#FAF7F2]/50 rounded-2xl p-5 shadow-sm border border-gray-100">
+              <div className="bg-[#FAF7F2]/50 rounded-xl p-5 shadow-sm border border-gray-100">
                 <h2 className="font-display font-bold text-[#222] text-[15px] mb-4">
                   Filter by
                 </h2>
@@ -340,7 +340,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                     onChange={(e) => setMaxPrice(parseInt(e.target.value))}
                     className="w-full accent-[#2C4631] h-1.5 bg-[#D9D9D9] rounded-lg appearance-none cursor-pointer"
                   />
-                  <div className="flex justify-center items-center mt-4 bg-white border border-gray-200 rounded-xl py-2 text-[11px] font-bold text-[#222]">
+                  <div className="flex justify-center items-center mt-4 bg-white border border-gray-200 rounded-lg py-2 text-[11px] font-bold text-[#222]">
                     <span>LKR 0 &nbsp;&nbsp;&mdash;&nbsp;&nbsp; LKR {maxPrice.toLocaleString()}</span>
                   </div>
                 </div>
@@ -369,7 +369,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
 
               {/* Trust Badges */}
               <div className="space-y-3">
-                <div className="bg-[#FAF7F2]/80 border border-gray-100 rounded-2xl p-4 flex gap-4 items-center">
+                <div className="bg-[#FAF7F2]/80 border border-gray-100 rounded-xl p-4 flex gap-4 items-center">
                   <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
                     <span className="text-xl">🌿</span>
                   </div>
@@ -378,7 +378,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                     <p className="text-[10px] text-[#666]">No artificial additives</p>
                   </div>
                 </div>
-                <div className="bg-[#FAF7F2]/80 border border-gray-100 rounded-2xl p-4 flex gap-4 items-center">
+                <div className="bg-[#FAF7F2]/80 border border-gray-100 rounded-xl p-4 flex gap-4 items-center">
                   <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
                     <span className="text-xl">✨</span>
                   </div>
@@ -387,7 +387,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                     <p className="text-[10px] text-[#666]">Made in small batches</p>
                   </div>
                 </div>
-                <div className="bg-[#FAF7F2]/80 border border-gray-100 rounded-2xl p-4 flex gap-4 items-center">
+                <div className="bg-[#FAF7F2]/80 border border-gray-100 rounded-xl p-4 flex gap-4 items-center">
                   <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
                     <span className="text-xl">🚚</span>
                   </div>
@@ -396,7 +396,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                     <p className="text-[10px] text-[#666]">Across Sri Lanka & Overseas</p>
                   </div>
                 </div>
-                <div className="bg-[#FAF7F2]/80 border border-gray-100 rounded-2xl p-4 flex gap-4 items-center">
+                <div className="bg-[#FAF7F2]/80 border border-gray-100 rounded-xl p-4 flex gap-4 items-center">
                   <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
                     <span className="text-xl">🛡️</span>
                   </div>
@@ -474,16 +474,16 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 max-w-5xl">
                   {paginatedProducts.map((product) => (
                     <div
                       key={product.id}
                       id={`product-card-${product.id}`}
-                      className="product-card bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 group flex flex-col justify-between transition-shadow hover:shadow-md"
+                      className="product-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group flex flex-col justify-between transition-shadow hover:shadow-md"
                     >
                       <Link href={`/products/${product.slug}`} className="block">
                         {/* Image area */}
-                        <div className="relative bg-[#F4EFE6] h-56 flex items-center justify-center overflow-hidden">
+                        <div className="relative bg-[#F4EFE6] h-40 sm:h-56 flex items-center justify-center overflow-hidden">
                           {product.stock <= 0 ? (
                             <span className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-sm z-10 bg-gray-500 text-white shadow-sm">
                               Out of Stock
@@ -512,7 +512,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                         </div>
 
                         {/* Content */}
-                        <div className="p-5 pb-2">
+                        <div className="p-3 sm:p-5 pb-1 sm:pb-2">
                           <h3 className="font-display font-bold text-[#222] text-[15px] leading-tight line-clamp-2 mb-2 group-hover:text-[#D98C1F] transition-colors">
                             {product.name}
                           </h3>
@@ -523,8 +523,8 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                         </div>
                       </Link>
 
-                      <div className="p-5 pt-1 flex items-center justify-between mt-auto">
-                        <span className="font-display font-bold text-[#D98C1F] text-[15px]">
+                      <div className="p-3 pt-1 sm:p-5 sm:pt-1 flex flex-col sm:flex-row sm:items-center justify-between mt-auto gap-2 sm:gap-0">
+                        <span className="font-sans font-bold tracking-tight text-[#D98C1F] text-[14px] sm:text-[15px]">
                           LKR {product.price.toLocaleString()}.00
                         </span>
                         <button

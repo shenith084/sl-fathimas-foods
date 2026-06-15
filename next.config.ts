@@ -44,7 +44,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "frame-ancestors 'none';", // Additional CSP can be expanded here
+            value: "script-src 'self' 'unsafe-eval' 'unsafe-inline'; frame-ancestors 'none';", 
           }
         ],
       },

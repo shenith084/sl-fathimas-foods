@@ -124,8 +124,8 @@ export default function Navbar() {
               { icon: "🏠", text: "100% Homemade" },
               { icon: "✅", text: "No Artificial Preservatives" },
               { icon: "🚚", text: "Delivery Across Sri Lanka & Overseas" },
-            ].map((item) => (
-              <span key={item.text} className="flex items-center gap-1.5 font-medium whitespace-nowrap">
+            ].map((item, index) => (
+              <span key={item.text} className={`flex items-center gap-1.5 font-medium whitespace-nowrap ${index > 0 ? "hidden md:flex" : ""}`}>
                 <span>{item.icon}</span>
                 {item.text}
               </span>
@@ -143,18 +143,16 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <div className="w-1/4 flex justify-start">
-              <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
-                <div className="flex flex-col items-center">
-                  <div className="w-11 h-11 rounded-full flex items-center justify-center bg-[#FAF7F2] p-1 border border-[#B8740F]/30 shadow-sm relative overflow-hidden">
-                    <Image src="/logo.png" alt="Fathima's" fill sizes="44px" className="object-cover" />
-                  </div>
+            <div className="flex-shrink-0 flex justify-start z-10 relative">
+              <Link href="/" className="flex items-center gap-2 md:gap-2.5">
+                <div className="w-9 h-9 md:w-11 md:h-11 rounded-full flex items-center justify-center bg-[#FAF7F2] p-0.5 border border-[#B8740F]/30 shadow-sm relative overflow-hidden flex-shrink-0">
+                  <Image src="/logo.png" alt="Fathima's" fill sizes="(max-width: 768px) 36px, 44px" className="object-cover" />
                 </div>
-                <div className="leading-none">
-                  <div className="font-display font-bold text-[#B8740F] text-base md:text-lg tracking-wide">
+                <div className="leading-none flex-shrink-0">
+                  <div className="font-display font-bold text-[#B8740F] text-[13px] sm:text-base md:text-lg tracking-wide whitespace-nowrap">
                     SL FATHIMA&apos;S
                   </div>
-                  <div className="font-display font-semibold text-[#D98C1F] text-[10px] md:text-[11px] tracking-[0.25em] mt-1.5">
+                  <div className="font-display font-semibold text-[#D98C1F] text-[8px] sm:text-[10px] md:text-[11px] tracking-[0.25em] mt-1">
                     FOODS
                   </div>
                 </div>
@@ -186,7 +184,7 @@ export default function Navbar() {
             </div>
 
             {/* Actions */}
-            <div className="w-1/4 flex justify-end items-center gap-2">
+            <div className="flex-shrink-0 flex justify-end items-center gap-1 sm:gap-2">
               <div ref={searchContainerRef} className="relative">
                 <button
                   id="navbar-search-btn"
