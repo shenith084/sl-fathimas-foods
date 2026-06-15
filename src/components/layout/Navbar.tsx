@@ -38,6 +38,7 @@ export default function Navbar() {
   
   const items = useCartStore((state) => state.items);
   const [cartCount, setCartCount] = useState(0);
+  const [hasUnreadOrders, setHasUnreadOrders] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -53,6 +54,20 @@ export default function Navbar() {
     });
     return () => unsubscribe();
   }, []);
+
+  // Poll for unread messages when the pathname changes or user logs in
+  useEffect(() => {
+    if (currentUser && !isAdmin) {
+      fetch(`/api/v1/orders?userId=${currentUser.uid}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setHasUnreadOrders(data.data.some((o: any) => o.hasUnreadMessage));
+          }
+        })
+        .catch(console.error);
+    }
+  }, [currentUser, isAdmin, pathname]);
 
   const handleSignOut = async () => {
     try {
@@ -209,6 +224,9 @@ export default function Navbar() {
                     <div className={`w-7 h-7 rounded-full ${isAdmin ? "bg-[#D98C1F]" : "bg-[#2C4631]"} hover:opacity-90 text-white flex items-center justify-center text-xs font-bold transition-colors shadow-sm`}>
                       {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : currentUser.email ? currentUser.email[0].toUpperCase() : "U"}
                     </div>
+                    {hasUnreadOrders && (
+                      <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+                    )}
                   </button>
                   {authDropdown && (
                     <div className="absolute right-0 top-[calc(100%+0.5rem)] w-64 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 py-2 z-50 animate-fade-in overflow-hidden">
@@ -240,9 +258,11 @@ export default function Navbar() {
                             <Link
                               href="/account/orders"
                               onClick={() => setAuthDropdown(false)}
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors font-medium group"
+                              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors font-medium group relative"
                             >
-                              <Package className="w-4 h-4 text-[#888] group-hover:text-[#D98C1F] transition-colors" /> My Orders
+                              <Package className="w-4 h-4 text-[#888] group-hover:text-[#D98C1F] transition-colors" /> 
+                              My Orders
+                              {hasUnreadOrders && <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>}
                             </Link>
                           </>
                         )}

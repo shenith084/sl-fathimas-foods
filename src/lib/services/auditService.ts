@@ -31,16 +31,47 @@ export async function logAuditAction({
   }
 }
 
-export async function getAuditLogs(limit = 50) {
-  const snapshot = await adminDb
-    .collection("audit_logs")
-    .orderBy("timestamp", "desc")
-    .limit(limit)
-    .get();
+export async function getAuditLogs({
+  limit = 50,
+  page = 1,
+  module,
+}: {
+  limit?: number;
+  page?: number;
+  module?: string;
+} = {}) {
+  let query: FirebaseFirestore.Query = adminDb.collection("audit_logs");
 
-  return snapshot.docs.map((doc) => ({
+  if (module && module !== "all") {
+    query = query.where("module", "==", module);
+  }
+
+  // Get total count
+  const countSnapshot = await query.count().get();
+  const total = countSnapshot.data().count;
+
+  // Pagination
+  query = query.orderBy("timestamp", "desc");
+  const offset = (page - 1) * limit;
+  if (offset > 0) {
+    query = query.offset(offset);
+  }
+  
+  query = query.limit(limit);
+
+  const snapshot = await query.get();
+
+  const logs = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
     timestamp: doc.data().timestamp?.toDate?.()?.toISOString() || null,
   }));
+
+  return {
+    logs,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }

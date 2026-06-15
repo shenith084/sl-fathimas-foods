@@ -77,6 +77,10 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
   alternates: { canonical: APP_URL },
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 
@@ -96,7 +100,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable} ${script.variable}`} data-scroll-behavior="smooth">
+    <html lang="en" className={`${inter.variable} ${playfair.variable} ${script.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className="font-sans antialiased bg-cream text-charcoal">
         <Suspense fallback={null}>
           <MetaPixel />

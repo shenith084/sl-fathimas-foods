@@ -201,3 +201,40 @@ export async function sendStatusUpdateEmail(customerEmail: string, customerName:
 
   return sendBrevoEmail([{ email: customerEmail, name: customerName }], subject, htmlContent);
 }
+
+export async function sendLowStockAlertAdminEmail(products: { id: string, name: string, stock: number }[]) {
+  if (products.length === 0) return false;
+  
+  const adminEmail = await getDynamicBusinessEmail();
+  const subject = `⚠️ Low Stock Alert: ${products.length} product(s) below threshold`;
+  
+  const itemsHtml = products.map(p => `
+    <tr>
+      <td style="padding: 10px; border-bottom: 1px solid #E8DFCC;"><strong>${p.name}</strong> (ID: ${p.id})</td>
+      <td style="padding: 10px; border-bottom: 1px solid #E8DFCC; text-align: center; color: red; font-weight: bold;">${p.stock} remaining</td>
+    </tr>
+  `).join("");
+
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; color: #222; max-width: 600px; margin: 0 auto;">
+      <div style="padding: 20px; background-color: #FEF2F2; border-left: 4px solid #DC2626; margin-bottom: 20px;">
+        <h2 style="color: #DC2626; margin-top: 0;">Low Stock Warning</h2>
+        <p>The following products have fallen to or below the low stock threshold (5 items) after a recent order.</p>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <thead>
+          <tr style="background-color: #FAF7F2;">
+            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #E8DFCC;">Product</th>
+            <th style="padding: 10px; text-align: center; border-bottom: 2px solid #E8DFCC;">Current Stock</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsHtml}
+        </tbody>
+      </table>
+      <p><a href="https://slfathimasfoods.com/admin/products" style="background-color: #2C4631; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Manage Inventory</a></p>
+    </div>
+  `;
+
+  return sendBrevoEmail([{ email: adminEmail, name: "Admin" }], subject, htmlContent);
+}

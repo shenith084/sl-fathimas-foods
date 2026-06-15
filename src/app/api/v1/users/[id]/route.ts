@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb, adminAuth } from "@/lib/firebase/admin";
 import { verifyToken, isSuperAdmin } from "@/lib/apiAuth";
-
+import { logAuditAction } from "@/lib/services/auditService";
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // 1. Verify the caller is authenticated
@@ -27,10 +27,23 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     //    (double-check even though caller is already a super admin — future proofing)
     // A super_admin CAN assign super_admin. This is intentional.
 
-    await adminDb.collection("users").doc(id).set({
+    const userRef = adminDb.collection("users").doc(id);
+    const existingDoc = await userRef.get();
+    const oldValue = existingDoc.exists ? existingDoc.data() : null;
+
+    await userRef.set({
       roleId,
       updated_at: new Date().toISOString()
     }, { merge: true });
+
+    await logAuditAction({
+      adminUid: caller.uid,
+      action: "update_user_role",
+      module: "users",
+      targetId: id,
+      oldValue,
+      newValue: { ...oldValue, roleId },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
@@ -64,7 +77,21 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       console.warn("User might not exist in Auth, but proceeding to delete from Firestore:", e.message);
     }
 
-    await adminDb.collection("users").doc(id).delete();
+    const userRef = adminDb.collection("users").doc(id);
+    const existingDoc = await userRef.get();
+    const oldValue = existingDoc.exists ? existingDoc.data() : null;
+
+    await userRef.delete();
+
+    await logAuditAction({
+      adminUid: caller.uid,
+      action: "delete_user",
+      module: "users",
+      targetId: id,
+      oldValue,
+      newValue: null,
+    });
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     if (error.message?.startsWith("UNAUTHORIZED")) {

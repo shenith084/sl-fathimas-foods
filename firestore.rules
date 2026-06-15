@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Public readable data
+    match /products/{document=**} {
+      allow read: if true;
+      allow write: if false; // Only Admin SDK can write
+    }
+    match /categories/{document=**} {
+      allow read: if true;
+      allow write: if false; // Only Admin SDK can write
+    }
+    
+    // Reviews
+    match /reviews/{document=**} {
+      allow read: if true;
+      // Any authenticated user can submit a review
+      allow write: if request.auth != null;
+    }
+    
+    // Users Collection
+    match /users/{userId} {
+      // Users can only read and write their own document
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Settings Collection
+    match /settings/{document=**} {
+      allow read: if true; // E.g., for shipping charges
+      allow write: if false; // Only Admin SDK can write
+    }
+
+    // Default deny for all other collections (orders, roles, audit_logs, etc.)
+    // Note: The Admin SDK (used in API routes) bypasses these rules entirely.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

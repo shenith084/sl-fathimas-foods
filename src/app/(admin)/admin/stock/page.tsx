@@ -21,6 +21,8 @@ export default function AdminStockPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
 
   useEffect(() => {
     fetch("/api/v1/stock")
@@ -58,9 +60,17 @@ export default function AdminStockPage() {
   const categories = Array.from(new Set(items.map(i => i.category)));
   const filtered = items.filter((i) => {
     const matchesSearch = i.name.toLowerCase().includes(search.toLowerCase()) || i.category.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = selectedCategory === "All Categories" || i.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    if (selectedCategory !== "All Categories" && i.category !== selectedCategory) return false;
+    return matchesSearch;
   });
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedItems = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedCategory]);
 
   return (
     <div>
@@ -141,7 +151,7 @@ export default function AdminStockPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((item) => {
+                {paginatedItems.map((item) => {
                   const isDirty = edits[item.id] !== undefined && edits[item.id] !== String(item.stock_count);
                   const currentValue = edits[item.id] ?? String(item.stock_count);
                   return (
@@ -210,8 +220,42 @@ export default function AdminStockPage() {
             </table>
             
             {/* Footer */}
-            <div className="mt-auto px-6 py-4 border-t border-gray-100 bg-white rounded-b-2xl">
-              <p className="text-xs font-medium text-[#888]">Showing {filtered.length} of {items.length} total products</p>
+            <div className="mt-auto px-6 py-4 border-t border-gray-100 bg-white rounded-b-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-xs font-medium text-[#888]">
+                Showing {Math.min(startIndex + 1, filtered.length)}-{Math.min(startIndex + itemsPerPage, filtered.length)} of {filtered.length} total products
+              </p>
+              
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-[11px] font-bold text-[#888] disabled:opacity-50 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  Prev
+                </button>
+                
+                {Array.from({ length: Math.max(1, totalPages) }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-7 h-7 flex items-center justify-center rounded-lg text-[11px] font-bold transition-colors ${
+                      currentPage === page 
+                        ? "bg-[#18181A] text-white" 
+                        : "text-[#666] hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="px-3 py-1.5 text-[11px] font-bold text-[#D98C1F] disabled:opacity-50 hover:bg-[#D98C1F]/10 rounded-lg transition-colors"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
         )}

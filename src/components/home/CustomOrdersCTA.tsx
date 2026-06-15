@@ -33,6 +33,7 @@ export default function CustomOrdersCTA() {
                 src="/images/gift_pack_box.png" 
                 alt="Custom Gift Packs" 
                 fill 
+                sizes="(max-width: 640px) 100vw, 50vw"
                 className="object-cover object-center sm:object-right"
               />
             </div>
@@ -64,6 +65,7 @@ export default function CustomOrdersCTA() {
                 src="/images/delivery_truck_map.png" 
                 alt="Islandwide Delivery" 
                 fill 
+                sizes="(max-width: 640px) 100vw, 50vw"
                 className="object-cover object-center sm:object-right mix-blend-multiply"
               />
             </div>

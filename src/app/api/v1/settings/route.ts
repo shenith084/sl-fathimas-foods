@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
-
+import { verifyToken } from "@/lib/apiAuth";
+import { logAuditAction } from "@/lib/services/auditService";
 const DEFAULTS = {
   deliveryCharge: 450,
   freeDeliveryThreshold: 5000,
@@ -30,11 +31,27 @@ export async function GET() {
 
 export async function PATCH(req: NextRequest) {
   try {
+    const caller = await verifyToken(req);
+
     const body = await req.json();
-    await adminDb.collection("settings").doc("business").set(
+    const docRef = adminDb.collection("settings").doc("business");
+    const existingDoc = await docRef.get();
+    const oldValue = existingDoc.exists ? existingDoc.data() : null;
+
+    await docRef.set(
       { ...body, updated_at: FieldValue.serverTimestamp() },
       { merge: true }
     );
+
+    await logAuditAction({
+      adminUid: caller.uid,
+      action: "update_settings",
+      module: "settings",
+      targetId: "business",
+      oldValue,
+      newValue: { ...oldValue, ...body },
+    });
+
     return NextResponse.json({ success: true, message: "Settings saved" });
   } catch {
     return NextResponse.json({ success: false, message: "Failed to save settings" }, { status: 500 });

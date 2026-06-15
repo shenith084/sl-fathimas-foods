@@ -18,6 +18,7 @@ interface Order {
   shippingDetails: { firstName: string; lastName: string; address: string; city: string; district: string };
   items: { name: string; qty: number; price: number; emoji: string; vacuum?: boolean; description?: string }[];
   status_history?: { status: string; timestamp: string; note?: string }[];
+  hasUnreadMessage?: boolean;
   createdAt: string;
 }
 
@@ -31,6 +32,17 @@ export default function MyOrdersPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("All Orders");
   const [currentPage, setCurrentPage] = useState(1);
+  const [uploadingReceiptId, setUploadingReceiptId] = useState<string | null>(null);
+  const [uploadSuccessId, setUploadSuccessId] = useState<string | null>(null);
+  const [reuploadOrderId, setReuploadOrderId] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [settings, setSettings] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('/api/v1/settings').then(r => r.json()).then(d => {
+      if (d.success) setSettings(d.data);
+    });
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -62,7 +74,54 @@ export default function MyOrdersPage() {
   useEffect(() => {
     setCurrentPage(1);
     setExpanded(null);
+    setReceiptFile(null);
   }, [activeTab]);
+
+  const handleUploadReceipt = async (orderId: string) => {
+    if (!receiptFile) return;
+    setUploadingReceiptId(orderId);
+    try {
+      const formData = new FormData();
+      formData.append("file", receiptFile);
+      const res = await fetch("/api/v1/upload-receipt", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || "Failed to upload");
+      
+      await fetch(`/api/v1/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ receiptUrl: data.url })
+      });
+      
+      setOrders(orders.map(o => o.id === orderId ? { ...o, paymentDetails: { ...o.paymentDetails, receiptUrl: data.url, method: "bank" } } : o));
+      setReceiptFile(null);
+      setReuploadOrderId(null);
+      setUploadSuccessId(orderId);
+      setTimeout(() => setUploadSuccessId(null), 3000);
+    } catch (err: any) {
+      alert("Failed to upload: " + err.message);
+    } finally {
+      setUploadingReceiptId(null);
+    }
+  };
+
+  const handleExpandOrder = async (order: Order) => {
+    const isExpanding = expanded !== order.id;
+    setExpanded(isExpanding ? order.id : null);
+    
+    if (isExpanding && order.hasUnreadMessage) {
+      try {
+        await fetch(`/api/v1/orders/${order.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ clearUnread: true })
+        });
+        setOrders(orders.map(o => o.id === order.id ? { ...o, hasUnreadMessage: false } : o));
+      } catch (err) {
+        console.error("Failed to clear unread message", err);
+      }
+    }
+  };
 
   const mapStatusToTab = (status: string) => {
     if (status === "pending") return "Pending";
@@ -149,8 +208,11 @@ export default function MyOrdersPage() {
                   
                   return (
                     <React.Fragment key={order.id}>
-                      <tr className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4 font-bold text-sm text-[#222]">#{order.id.substring(0, 8).toUpperCase()}</td>
+                      <tr className={`transition-colors ${order.hasUnreadMessage ? "bg-red-50/70 border-l-4 border-l-red-500" : "hover:bg-gray-50/50"}`}>
+                        <td className="px-6 py-4 font-bold text-sm text-[#222] flex items-center gap-2">
+                          #{order.id.substring(0, 8).toUpperCase()}
+                          {order.hasUnreadMessage && <span className="bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse shadow-sm whitespace-nowrap">New Message</span>}
+                        </td>
                         <td className="px-6 py-4 text-sm text-[#555]">
                           {new Date(order.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                         </td>
@@ -161,7 +223,7 @@ export default function MyOrdersPage() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button
-                            onClick={() => setExpanded(isExpanded ? null : order.id)}
+                            onClick={() => handleExpandOrder(order)}
                             className={`px-4 py-1.5 border rounded-lg text-xs font-semibold transition-colors ${
                               isExpanded 
                                 ? "bg-[#D98C1F] border-[#D98C1F] text-white" 
@@ -177,6 +239,34 @@ export default function MyOrdersPage() {
                         <tr>
                           <td colSpan={6} className="bg-[#FAF7F2]/50 p-0 border-b border-gray-100 shadow-inner">
                             <div className="px-8 py-8 space-y-8">
+                              {/* Admin Messages */}
+                              {order.status_history && order.status_history.filter(h => h.note).length > 0 && (
+                                <div className="bg-[#FFFDF9] border border-[#D98C1F]/30 rounded-2xl p-5 shadow-sm">
+                                  <p className="text-xs font-bold tracking-widest text-[#D98C1F] uppercase mb-4 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-[#D98C1F] animate-pulse"></span>
+                                    Messages from Admin
+                                  </p>
+                                  <div className="space-y-4">
+                                    {order.status_history.filter(h => h.note).map((h, i) => (
+                                      <div key={i} className="flex gap-3 items-start">
+                                        <div className="w-8 h-8 rounded-full bg-[#D98C1F]/10 flex items-center justify-center flex-shrink-0 text-[#D98C1F]">
+                                          <Package className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                          <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-sm font-bold text-[#222]">Admin</span>
+                                            <span className="text-xs text-[#888]">{new Date(h.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
+                                          </div>
+                                          <p className="text-sm text-[#444] leading-relaxed bg-white border border-gray-100 p-3 rounded-xl rounded-tl-none inline-block shadow-sm">
+                                            {h.note}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
                               {/* Progress */}
                               <div>
                                 <p className="text-xs font-bold tracking-widest text-[#D98C1F] uppercase mb-4">Order Progress</p>
@@ -241,7 +331,6 @@ export default function MyOrdersPage() {
                                 </div>
                               </div>
 
-                              {/* Shipping & Payment */}
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4">
                                 <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                                   <p className="text-xs font-bold tracking-widest text-[#D98C1F] uppercase mb-3">Shipping To</p>
@@ -253,14 +342,63 @@ export default function MyOrdersPage() {
                                 </div>
                                 <div className="bg-white border border-gray-100 rounded-2xl p-6 flex flex-col justify-between shadow-sm">
                                   <div>
-                                    <p className="text-xs font-bold tracking-widest text-[#D98C1F] uppercase mb-3">Payment Method</p>
-                                    <div className="inline-block bg-[#FAF7F2] text-[#444] font-bold text-sm px-4 py-2 rounded-lg capitalize border border-gray-100">
-                                      {order.paymentDetails?.method === "bank" ? "Bank Transfer" : "Cash on Delivery"}
+                                    <p className="text-xs font-bold tracking-widest text-[#D98C1F] uppercase mb-3">Payment</p>
+                                    <div className="inline-block bg-[#FAF7F2] text-[#444] font-bold text-sm px-4 py-2 rounded-lg capitalize border border-gray-100 mb-4">
+                                      {order.paymentDetails?.method === "bank" ? "Bank Transfer" : (order.paymentDetails?.method || "Pending")}
                                     </div>
+                                    
+                                    {order.items?.[0]?.name === "Custom Order Request" && order.total > 0 && (!order.paymentDetails?.receiptUrl || reuploadOrderId === order.id) && (
+                                      <div className="mt-2 p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                                        <div className="flex justify-between items-start mb-2">
+                                          <p className="text-xs font-bold text-[#222]">
+                                            {order.paymentDetails?.receiptUrl ? "Update Payment Receipt" : "Advance Payment Required"}
+                                          </p>
+                                          {order.paymentDetails?.receiptUrl && (
+                                            <button onClick={() => setReuploadOrderId(null)} className="text-[10px] text-[#888] hover:text-[#444] underline">Cancel</button>
+                                          )}
+                                        </div>
+                                        <p className="text-xs text-[#666] mb-3">Please transfer LKR {order.total?.toLocaleString()} to our bank account and upload your receipt below to confirm the order.</p>
+                                        
+                                        {settings?.bank1Name && (
+                                          <div className="bg-white border border-[#D98C1F]/30 p-3 rounded-lg mb-3">
+                                            <p className="text-xs font-bold text-[#D98C1F] mb-1">Bank Details</p>
+                                            <div className="text-xs text-[#555] space-y-0.5">
+                                              <p>Bank: <span className="font-medium text-[#222]">{settings.bank1Name}</span></p>
+                                              <p>Branch: <span className="font-medium text-[#222]">{settings.bank1Branch}</span></p>
+                                              <p>Acc Name: <span className="font-medium text-[#222]">{settings.bank1AccountName}</span></p>
+                                              <p>Acc No: <span className="font-bold text-[#222]">{settings.bank1AccountNo}</span></p>
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        <input 
+                                          type="file" 
+                                          accept="image/*,.pdf"
+                                          onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                                          className="block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#D98C1F]/10 file:text-[#D98C1F] hover:file:bg-[#D98C1F]/20 mb-3"
+                                        />
+                                        <button 
+                                          onClick={() => handleUploadReceipt(order.id)}
+                                          disabled={!receiptFile || uploadingReceiptId === order.id || uploadSuccessId === order.id}
+                                          className={`w-full text-white text-xs font-bold py-2 rounded-lg disabled:opacity-50 transition-colors ${uploadSuccessId === order.id ? 'bg-green-600' : 'bg-[#2C4631]'}`}
+                                        >
+                                          {uploadSuccessId === order.id ? "Uploaded ✅" : uploadingReceiptId === order.id ? "Uploading..." : "Submit Receipt"}
+                                        </button>
+                                      </div>
+                                    )}
+
+                                    {order.paymentDetails?.receiptUrl && reuploadOrderId !== order.id && (
+                                      <div className="mt-2 p-3 bg-green-50 border border-green-100 rounded-xl flex items-center justify-between">
+                                        <p className="text-xs font-bold text-green-700 flex items-center gap-1.5">
+                                          <span className="w-4 h-4 bg-green-500 text-white rounded-full flex items-center justify-center text-[10px]">✓</span> 
+                                          Payment Receipt Submitted
+                                        </p>
+                                        <button onClick={() => setReuploadOrderId(order.id)} className="text-[10px] text-green-700 underline font-semibold hover:text-green-800">
+                                          Re-upload
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
-                                  <p className="text-xs text-[#888] mt-4 flex items-center gap-2">
-                                    <Package className="w-3.5 h-3.5" /> Delivery via Domex
-                                  </p>
                                 </div>
                               </div>
                             </div>

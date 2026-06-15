@@ -17,9 +17,25 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const { status, note, adminUid } = await req.json();
+    const { status, note, adminUid, total, receiptUrl, clearUnread, clearUnreadReceipt } = await req.json();
     const oldOrder = await getOrderById(id);
-    await updateOrderStatus(id, status, note);
+    
+    if (clearUnread) {
+      await import("@/lib/services/orderService").then(m => m.clearUnreadMessage(id));
+      return NextResponse.json({ success: true, message: "Unread message cleared" });
+    }
+
+    if (clearUnreadReceipt) {
+      await import("@/lib/services/orderService").then(m => m.clearUnreadReceiptFlag(id));
+      return NextResponse.json({ success: true, message: "Unread receipt cleared" });
+    }
+
+    if (receiptUrl) {
+      await import("@/lib/services/orderService").then(m => m.updateOrderPayment(id, receiptUrl));
+      return NextResponse.json({ success: true, message: "Payment receipt uploaded" });
+    }
+
+    await updateOrderStatus(id, status, note, total);
     await logAuditAction({
       adminUid: adminUid || "system",
       action: "update_order_status",

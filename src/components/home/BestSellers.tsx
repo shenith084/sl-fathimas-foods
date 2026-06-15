@@ -16,7 +16,7 @@ export interface Product {
   weight?: string;
   emoji: string;
   images?: string[];
-  badge?: "Best Seller" | "New" | "Out of Stock";
+  badge?: "Best Seller" | "New" | "Out of Stock" | "Popular";
   rating?: number;
   reviewCount?: number;
 }

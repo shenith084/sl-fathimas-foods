@@ -22,6 +22,8 @@ export default function AdminOrdersPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
 
   useEffect(() => {
     async function load() {
@@ -46,6 +48,15 @@ export default function AdminOrdersPage() {
       o.shippingDetails?.email?.toLowerCase().includes(q)
     );
   });
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedOrders = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+  // Reset to page 1 when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
 
   function getTabColor(status: string) {
     if (statusFilter === status) return "bg-[#18181A] text-white border-[#18181A]";
@@ -120,10 +131,17 @@ export default function AdminOrdersPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((order) => (
-                  <tr key={order.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                {paginatedOrders.map((order: any) => {
+                  const isPending = order.status === "pending";
+                  const hasUnreadReceipt = order.hasUnreadReceipt;
+                  const needsAttention = isPending || hasUnreadReceipt;
+                  
+                  return (
+                  <tr key={order.id} className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${needsAttention ? "bg-red-50/70 border-l-4 border-l-red-500" : ""}`}>
                     <td className="px-6 py-4">
-                      <span className="font-bold text-[11px] tracking-wider text-[#E88E23]">#{order.id.substring(0, 8).toUpperCase()}</span>
+                      <span className={`font-bold text-[11px] tracking-wider ${needsAttention ? "text-red-600" : "text-[#E88E23]"}`}>#{order.id.substring(0, 8).toUpperCase()}</span>
+                      {hasUnreadReceipt && <span className="ml-2 bg-green-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse shadow-sm">Receipt</span>}
+                      {isPending && !hasUnreadReceipt && <span className="ml-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse shadow-sm">New</span>}
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-sm font-bold text-[#222]">
@@ -156,13 +174,48 @@ export default function AdminOrdersPage() {
                       </Link>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
             
             {/* Footer */}
-            <div className="mt-auto px-6 py-4 border-t border-gray-100 bg-white rounded-b-2xl">
-              <p className="text-xs font-medium text-[#888]">Showing {filtered.length} of {orders.length} total orders</p>
+            <div className="mt-auto px-6 py-4 border-t border-gray-100 bg-white rounded-b-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-xs font-medium text-[#888]">
+                Showing {Math.min(startIndex + 1, filtered.length)}-{Math.min(startIndex + itemsPerPage, filtered.length)} of {filtered.length} total orders
+              </p>
+              
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-[11px] font-bold text-[#888] disabled:opacity-50 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  Prev
+                </button>
+                
+                {Array.from({ length: Math.max(1, totalPages) }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-7 h-7 flex items-center justify-center rounded-lg text-[11px] font-bold transition-colors ${
+                      currentPage === page 
+                        ? "bg-[#18181A] text-white" 
+                        : "text-[#666] hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="px-3 py-1.5 text-[11px] font-bold text-[#D98C1F] disabled:opacity-50 hover:bg-[#D98C1F]/10 rounded-lg transition-colors"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
         )}

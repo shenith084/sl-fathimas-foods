@@ -29,6 +29,7 @@ export default function OrderDetailPage() {
   const [updating, setUpdating] = useState(false);
   const [note, setNote] = useState("");
   const [newStatus, setNewStatus] = useState("");
+  const [newTotal, setNewTotal] = useState("");
 
   useEffect(() => {
     fetch(`/api/v1/orders/${id}`)
@@ -37,21 +38,45 @@ export default function OrderDetailPage() {
         if (data.success) {
           setOrder(data.data);
           setNewStatus(data.data.status);
+          setNewTotal(data.data.total?.toString() || "0");
+          
+          if (data.data.hasUnreadReceipt) {
+            fetch(`/api/v1/orders/${id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ clearUnreadReceipt: true }),
+            }).catch(console.error);
+          }
         }
       })
       .finally(() => setLoading(false));
   }, [id]);
 
   async function handleStatusUpdate() {
-    if (!newStatus || newStatus === order?.status) return;
+    if (!newStatus) return;
     setUpdating(true);
     try {
-      await fetch(`/api/v1/orders/${id}`, {
+      const payload: any = { status: newStatus, note };
+      if (isCustomOrder && newTotal) {
+        payload.total = Number(newTotal);
+      }
+
+      const res = await fetch(`/api/v1/orders/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus, note }),
+        body: JSON.stringify(payload),
       });
-      setOrder((prev) => prev ? { ...prev, status: newStatus } : prev);
+      const resData = await res.json();
+      
+      if (!resData.success) {
+        alert("Failed to update order");
+        return;
+      }
+
+      setOrder((prev) => prev ? { ...prev, status: newStatus, total: payload.total ?? prev.total, subtotal: payload.total ?? prev.subtotal } : prev);
+      if (payload.total !== undefined) {
+        setNewTotal(payload.total.toString());
+      }
       setNote("");
     } finally {
       setUpdating(false);
@@ -72,6 +97,7 @@ export default function OrderDetailPage() {
   );
 
   const currentIndex = ORDER_WORKFLOW.indexOf(order.status);
+  const isCustomOrder = order.items?.[0]?.name === "Custom Order Request";
 
   return (
     <div>
@@ -117,7 +143,7 @@ export default function OrderDetailPage() {
               ))}
             </select>
           </div>
-          <div className="flex-1">
+          <div className="flex-[2]">
             <label className="block text-xs font-semibold text-[#555] mb-1.5">Note (optional)</label>
             <input
               value={note} onChange={(e) => setNote(e.target.value)}
@@ -125,9 +151,20 @@ export default function OrderDetailPage() {
               className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#D98C1F]"
             />
           </div>
+          {isCustomOrder && (
+            <div className="flex-1 min-w-[120px]">
+              <label className="block text-xs font-semibold text-[#555] mb-1.5">Quote Total (LKR)</label>
+              <input
+                type="number"
+                value={newTotal} onChange={(e) => setNewTotal(e.target.value)}
+                placeholder="0"
+                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#D98C1F]"
+              />
+            </div>
+          )}
           <button
             onClick={handleStatusUpdate}
-            disabled={updating || newStatus === order.status}
+            disabled={updating || (newStatus === order.status && note === "" && (!isCustomOrder || newTotal === order.total?.toString()))}
             className="px-5 py-2.5 bg-[#D98C1F] hover:bg-[#B8740F] text-white text-sm font-semibold rounded-xl transition-colors disabled:bg-gray-200 disabled:text-gray-400"
           >
             {updating ? "Saving..." : "Update"}

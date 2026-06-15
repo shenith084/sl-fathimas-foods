@@ -177,7 +177,7 @@ export default function BuildGiftPackPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-xl overflow-hidden relative">
                         {product.images?.[0] ? (
-                          <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+                          <Image src={product.images[0]} alt={product.name} fill sizes="40px" className="object-cover" />
                         ) : (
                           <span>{product.emoji || "📦"}</span>
                         )}
@@ -293,7 +293,7 @@ export default function BuildGiftPackPage() {
                     <div key={idx} className="flex items-center gap-3 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
                       <div className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center overflow-hidden relative">
                          {item.product.images?.[0] ? (
-                          <Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
+                          <Image src={item.product.images[0]} alt={item.product.name} fill sizes="40px" className="object-cover" />
                         ) : (
                           <span className="text-lg">{item.product.emoji}</span>
                         )}

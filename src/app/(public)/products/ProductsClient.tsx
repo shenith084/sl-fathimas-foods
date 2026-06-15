@@ -498,8 +498,8 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                               src={product.images[0]} 
                               alt={product.name}
                               fill
-                              sizes="(max-width: 768px) 50vw, 25vw"
-                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
                             <span className="text-6xl group-hover:scale-110 transition-transform duration-300 select-none drop-shadow-md">

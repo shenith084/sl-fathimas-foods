@@ -52,6 +52,7 @@ export async function getUserRoleData(uid: string, email?: string | null): Promi
         roles: { create: true, read: true, update: true, delete: true },
         settings: { create: true, read: true, update: true, delete: true },
         content: { create: true, read: true, update: true, delete: true },
+        messages: { create: true, read: true, update: true, delete: true },
       }
     };
   }
@@ -72,6 +73,7 @@ export async function getUserRoleData(uid: string, email?: string | null): Promi
         roles: { create: false, read: false, update: false, delete: false },
         settings: { create: false, read: false, update: false, delete: false },
         content: { create: false, read: true, update: false, delete: false },
+        messages: { create: false, read: true, update: false, delete: false },
       }
     };
   }

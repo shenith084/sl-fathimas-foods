@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { verifyToken, isSuperAdmin } from "@/lib/apiAuth";
-
+import { logAuditAction } from "@/lib/services/auditService";
 export async function GET() {
   try {
     const snapshot = await adminDb.collection("roles").orderBy("name", "asc").get();
@@ -38,10 +38,22 @@ export async function POST(req: Request) {
     // (already enforced above, but extra safety)
 
     const roleRef = adminDb.collection("roles").doc(id);
+    const existingDoc = await roleRef.get();
+    const oldValue = existingDoc.exists ? existingDoc.data() : null;
+
     await roleRef.set({
       ...data,
       updatedAt: new Date().toISOString()
     }, { merge: true });
+
+    await logAuditAction({
+      adminUid: caller.uid,
+      action: oldValue ? "update_role" : "create_role",
+      module: "roles",
+      targetId: id,
+      oldValue,
+      newValue: { id, ...data },
+    });
 
     return NextResponse.json({ success: true, data: { id, ...data } });
   } catch (error: any) {

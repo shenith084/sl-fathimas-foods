@@ -50,7 +50,6 @@ export const categories: Category[] = [
   },
   { id: "food-truck-list", name: "Food Truck List", slug: "food-truck-list", emoji: "🚚", color: "bg-indigo-100" },
   { id: "custom-orders", name: "Custom Orders", slug: "custom-orders", emoji: "✨", color: "bg-teal-100" },
-  { id: "gift-packs", name: "Gift Packs", slug: "gift-packs", emoji: "🎁", color: "bg-purple-100" },
 ];
 
 export const products: Product[] = [
@@ -1013,37 +1012,5 @@ export const products: Product[] = [
     "rating": 4.7,
     "reviews": 60,
     "customizable": true
-  },
-  {
-    "id": "gift-pack-small",
-    "name": "Gift Pack — Small",
-    "slug": "gift-pack-small",
-    "category": "gift-packs",
-    "price": 2500,
-    "weight": "800g",
-    "shelfLife": "3 months",
-    "ingredients": "Assortment of selected pickles and sambals in a premium decorated gift box",
-    "description": "A beautiful mini-gift box containing an assortment of our best-selling pickles and sambals in smaller 100g jars. Ideal for gifting loved ones.",
-    "emoji": "🎁",
-    "badge": "Popular",
-    "rating": 4.9,
-    "reviews": 67,
-    "customizable": false
-  },
-  {
-    "id": "gift-pack-large",
-    "name": "Gift Pack — Large",
-    "slug": "gift-pack-large",
-    "category": "gift-packs",
-    "price": 4500,
-    "weight": "1.8kg",
-    "shelfLife": "3 months",
-    "ingredients": "Full size Biriyani Combo Kit, plus three full-size jars (Pickle, Sambal, Seenima) in a premium custom-decorated gift box",
-    "description": "Our ultimate signature gift box. Contains a full-size Biriyani Combo Kit, a jar of Chicken Pickle, a jar of Maldive Fish Sambal, and a jar of Seenima. Packed beautifully in a custom-designed Fathima's Foods gift chest.",
-    "emoji": "🎀",
-    "badge": "Popular",
-    "rating": 5,
-    "reviews": 42,
-    "customizable": false
   }
 ];

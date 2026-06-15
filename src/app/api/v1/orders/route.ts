@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { items, shippingDetails, paymentDetails, subtotal, deliveryCharge, total, userId, status } = body;
 
-    if (!items || !shippingDetails || !total) {
+    if (!items || !shippingDetails || total === undefined) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
