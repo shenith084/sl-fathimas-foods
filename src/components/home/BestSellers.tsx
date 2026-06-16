@@ -181,53 +181,43 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-export default function BestSellers() {
+export default function BestSellers({ liveProducts }: { liveProducts?: any[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [products, setProducts] = useState<Product[]>(bestSellers);
+  const [products, setProducts] = useState<Product[]>(() => {
+    if (!liveProducts || liveProducts.length === 0) return bestSellers;
 
-  useEffect(() => {
-    fetch('/api/v1/products')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.data) {
-          const liveData = data.data;
-          
-          // Find any products marked as "Popular" in the database
-          const popularProducts = liveData.filter((p: any) => p.badge === "Popular");
-          
-          if (popularProducts.length > 0) {
-            // If the admin has marked products as popular, show those!
-            setProducts(popularProducts.map((p: any) => ({
-              id: p.id || p.slug,
-              name: p.name,
-              category: p.category ? p.category.replace(/-/g, " ").toUpperCase() : "PRODUCT",
-              price: p.price,
-              emoji: p.emoji || "📦",
-              weight: p.weight,
-              images: p.images,
-              badge: p.badge,
-              rating: p.rating || 4.9,
-              reviewCount: p.reviews || 0,
-            })));
-          } else {
-            // Fallback to updating prices on the default list if no popular products exist yet
-            const merged = bestSellers.map(staticProd => {
-              const liveMatch = liveData.find((p: any) => p.slug === staticProd.id || p.id === staticProd.id);
-              if (liveMatch) {
-                return {
-                  ...staticProd,
-                  price: liveMatch.price || staticProd.price,
-                  images: liveMatch.images || undefined,
-                };
-              }
-              return staticProd;
-            });
-            setProducts(merged);
-          }
+    // Find any products marked as "Popular" in the database
+    const popularProducts = liveProducts.filter((p: any) => p.badge === "Popular");
+    
+    if (popularProducts.length > 0) {
+      // If the admin has marked products as popular, show those!
+      return popularProducts.map((p: any) => ({
+        id: p.slug || p.id,
+        name: p.name,
+        category: p.category ? p.category.replace(/-/g, " ").toUpperCase() : "PRODUCT",
+        price: p.price,
+        emoji: p.emoji || "📦",
+        weight: p.weight,
+        images: p.images,
+        badge: p.badge,
+        rating: p.rating || 4.9,
+        reviewCount: p.reviews || 0,
+      }));
+    } else {
+      // Fallback to updating prices on the default list if no popular products exist yet
+      return bestSellers.map(staticProd => {
+        const liveMatch = liveProducts.find((p: any) => p.slug === staticProd.id || p.id === staticProd.id);
+        if (liveMatch) {
+          return {
+            ...staticProd,
+            price: liveMatch.price || staticProd.price,
+            images: liveMatch.images || undefined,
+          };
         }
-      })
-      .catch(console.error);
-  }, []);
+        return staticProd;
+      });
+    }
+  });
 
   const scroll = (dir: "left" | "right") => {
     if (scrollRef.current) {

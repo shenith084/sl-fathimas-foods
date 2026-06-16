@@ -5,7 +5,7 @@ import CategoryShowcase from "@/components/home/CategoryShowcase";
 import StatsBanner from "@/components/home/StatsBanner";
 import CustomOrdersCTA from "@/components/home/CustomOrdersCTA";
 import type { Metadata } from "next";
-import Script from "next/script";
+import { getProducts } from "@/lib/services/productService";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://slfathimasfoods.com";
 
@@ -79,7 +79,16 @@ const localBusinessSchema = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Fetch products natively on the server during render/build!
+  // This guarantees NO layout shift and NO dummy loading images for the user!
+  let liveProducts: any[] = [];
+  try {
+    liveProducts = await getProducts();
+  } catch (error) {
+    console.error("Failed to fetch products for HomePage", error);
+  }
+
   return (
     <>
       {/* LocalBusiness Schema.org JSON-LD */}
@@ -95,7 +104,7 @@ export default function HomePage() {
       <WhyChooseUs />
 
       {/* Best Selling Products */}
-      <BestSellers />
+      <BestSellers liveProducts={liveProducts} />
 
       {/* Shop By Category */}
       <CategoryShowcase />
@@ -108,4 +117,3 @@ export default function HomePage() {
     </>
   );
 }
-
