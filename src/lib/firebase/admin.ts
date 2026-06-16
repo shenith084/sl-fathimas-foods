@@ -35,7 +35,18 @@ function getAdminApp(): App {
   // Fallback to separate keys
   if (!credential && privateKey && clientEmail) {
     try {
-      const cleanedPrivateKey = privateKey.replace(/^['"]|['"]$/g, '').replace(/\\n/g, '\n');
+      let cleanedPrivateKey = privateKey.replace(/^['"]|['"]$/g, '').replace(/\\n/g, '\n');
+      
+      // If the user pasted it without newlines (e.g. Vercel stripped them), reconstruct the PEM format!
+      if (!cleanedPrivateKey.includes('\n')) {
+        const match = cleanedPrivateKey.match(/-----BEGIN PRIVATE KEY-----\s*(.*?)\s*-----END PRIVATE KEY-----/);
+        if (match) {
+          const base64Part = match[1].replace(/\s+/g, ''); // Remove all spaces
+          const formattedBase64 = base64Part.match(/.{1,64}/g)?.join('\n') || base64Part;
+          cleanedPrivateKey = `-----BEGIN PRIVATE KEY-----\n${formattedBase64}\n-----END PRIVATE KEY-----\n`;
+        }
+      }
+
       credential = cert({
         projectId,
         clientEmail,
