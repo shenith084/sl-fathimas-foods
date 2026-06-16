@@ -9,49 +9,54 @@ function getAdminApp(): App {
     return getApps()[0];
   }
 
-  // In production, use FIREBASE_ADMIN_SDK_KEY env var (JSON string of service account)
-  // In dev, we use a simplified approach with project ID only (no auth validation)
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "sl-fathimas-foods";
+  const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "sl-fathima-s-foods.firebasestorage.app";
 
   const adminSdkKey = process.env.FIREBASE_ADMIN_SDK_KEY;
   const privateKey = process.env.FIREBASE_PRIVATE_KEY;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
 
+  let credential;
+
+  // Try parsing the full JSON string first
   if (adminSdkKey) {
     try {
-      // Remove surrounding single or double quotes if Next.js didn't strip them
-      const cleanedKey = adminSdkKey.replace(/^['"]|['"]$/g, '');
+      let cleanedKey = adminSdkKey.replace(/^['"]|['"]$/g, '');
+      // Re-escape actual newlines if Vercel mangled them
+      cleanedKey = cleanedKey.replace(/\n/g, '\\n');
       const serviceAccount = JSON.parse(cleanedKey);
-      
-      adminApp = initializeApp({
-        credential: cert(serviceAccount),
-        projectId,
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "sl-fathima-s-foods.firebasestorage.app"
-      });
-      console.log("Firebase Admin SDK successfully initialized with Service Account Key.");
+      credential = cert(serviceAccount);
+      console.log("Successfully parsed FIREBASE_ADMIN_SDK_KEY.");
     } catch (error) {
-      console.error("CRITICAL ERROR: Failed to parse FIREBASE_ADMIN_SDK_KEY:", error);
-      adminApp = initializeApp({ projectId });
+      console.error("Failed to parse FIREBASE_ADMIN_SDK_KEY (JSON might be mangled). Trying fallback...");
     }
-  } else if (privateKey && clientEmail) {
+  }
+
+  // Fallback to separate keys
+  if (!credential && privateKey && clientEmail) {
     try {
       const cleanedPrivateKey = privateKey.replace(/^['"]|['"]$/g, '').replace(/\\n/g, '\n');
-      adminApp = initializeApp({
-        credential: cert({
-          projectId,
-          clientEmail,
-          privateKey: cleanedPrivateKey,
-        }),
+      credential = cert({
         projectId,
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "sl-fathima-s-foods.firebasestorage.app"
+        clientEmail,
+        privateKey: cleanedPrivateKey,
       });
-      console.log("Firebase Admin SDK successfully initialized with Client Email and Private Key.");
+      console.log("Successfully loaded Client Email and Private Key.");
     } catch (error) {
-      console.error("CRITICAL ERROR: Failed to initialize with Client Email and Private Key:", error);
-      adminApp = initializeApp({ projectId });
+      console.error("Failed to initialize with Client Email and Private Key:", error);
     }
+  }
+
+  // Initialize App
+  if (credential) {
+    adminApp = initializeApp({
+      credential,
+      projectId,
+      storageBucket
+    });
   } else {
-    adminApp = initializeApp({ projectId });
+    console.warn("WARNING: Initializing Firebase Admin without credentials. Database access will likely fail in production.");
+    adminApp = initializeApp({ projectId, storageBucket });
   }
 
   return adminApp;
