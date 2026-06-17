@@ -17,12 +17,7 @@ import { createOrUpdateUserDoc, isAdminUser } from "@/lib/services/userService";
 type Mode = "login" | "register" | "forgot";
 
 async function redirectByRole(user: any, fallbackRedirect: string | null, router: ReturnType<typeof useRouter>) {
-  const isAdmin = await isAdminUser(user.uid, user.email);
-  if (isAdmin) {
-    router.push("/admin/dashboard");
-  } else {
-    router.push(fallbackRedirect || "/products");
-  }
+  router.push(fallbackRedirect || "/products");
 }
 
 function AuthForm() {
@@ -88,12 +83,7 @@ function AuthForm() {
       await updateProfile(userCred.user, { displayName: form.name });
       // Create user document + auto-assign role based on email
       const role = await createOrUpdateUserDoc(userCred.user.uid, form.email, form.name);
-      // Route by assigned role
-      if (role === "owner" || role === "staff") {
-        router.push("/admin/dashboard");
-      } else {
-        router.push(redirect || "/products");
-      }
+      router.push(redirect || "/products");
     } catch (err: any) {
       console.error("Registration error:", err);
       let msg = "Failed to create account. Please try again.";
