@@ -234,17 +234,6 @@ export default function Navbar() {
                       </div>
                       
                       <div className="py-2 px-2">
-                        {isAdmin ? (
-                          <>
-                            <Link
-                              href="/admin/dashboard"
-                              onClick={() => setAuthDropdown(false)}
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors font-medium group"
-                            >
-                              <LayoutDashboard className="w-4 h-4 text-[#888] group-hover:text-[#D98C1F] transition-colors" /> Admin Panel
-                            </Link>
-                          </>
-                        ) : (
                           <>
                             <Link
                               href="/account"
@@ -263,7 +252,6 @@ export default function Navbar() {
                               {hasUnreadOrders && <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>}
                             </Link>
                           </>
-                        )}
                       </div>
                       
                       <div className="border-t border-gray-50 mt-1 pt-2 px-2 pb-1">
@@ -331,12 +319,6 @@ export default function Navbar() {
               ))}
               {currentUser && (
                 <div className="pt-2 border-t border-gray-100 space-y-1">
-                  {isAdmin ? (
-                    <Link href="/admin/dashboard" onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-[#D98C1F] hover:bg-[#FAF7F2] rounded-lg">
-                      <LayoutDashboard className="w-4 h-4" /> Admin Panel
-                    </Link>
-                  ) : (
                     <>
                       <Link href="/account" onClick={() => setMobileOpen(false)}
                         className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-[#222] hover:bg-[#FAF7F2] rounded-lg">
@@ -347,7 +329,6 @@ export default function Navbar() {
                         <Package className="w-4 h-4" /> My Orders
                       </Link>
                     </>
-                  )}
                   <button onClick={() => { handleSignOut(); setMobileOpen(false); }}
                     className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg w-full">
                     <LogOut className="w-4 h-4" /> Sign Out
