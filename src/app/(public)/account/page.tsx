@@ -6,7 +6,7 @@ import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { ShoppingBag, User, Package, ChevronRight, Clock } from "lucide-react";
-import StatusBadge from "@/components/admin/StatusBadge";
+import StatusBadge from "@/components/ui/StatusBadge";
 
 interface Order {
   id: string;

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { Package, ShoppingBag } from "lucide-react";
-import StatusBadge from "@/components/admin/StatusBadge";
+import StatusBadge from "@/components/ui/StatusBadge";
 import Link from "next/link";
 
 interface Order {
