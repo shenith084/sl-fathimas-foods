@@ -27,7 +27,11 @@ export default function CategoryShowcase() {
           {categories.map((cat) => (
             <Link
               key={cat.slug}
-              href={`/categories/${cat.slug}`}
+              href={
+                cat.slug === "custom-orders" ? "/custom-orders" :
+                cat.slug === "gift-packs" ? "/gift-packs" :
+                "/products"
+              }
               id={`category-${cat.slug}`}
               className="flex flex-col items-center gap-3 group"
             >

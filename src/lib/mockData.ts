@@ -56,7 +56,6 @@ export const categories: Category[] = [
     ]
   },
   { id: "food-truck-list", name: "Food Truck List", slug: "food-truck-list", emoji: "🚚", color: "bg-indigo-100" },
-  { id: "custom-orders", name: "Custom Orders", slug: "custom-orders", emoji: "✨", color: "bg-teal-100" },
 ];
 
 export const products: Product[] = [

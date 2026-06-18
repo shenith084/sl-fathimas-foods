@@ -26,7 +26,7 @@ export const foodTruckListIds = [
 const badgeColors: Record<string, string> = {
   Popular: "bg-[#D98C1F] text-white",
   New: "bg-[#2C4631] text-white",
-  "Out of Stock": "bg-gray-400 text-white",
+  "Out of Stock": "bg-red-500 text-white",
 };
 
 function StarRating({ rating }: { rating: number }) {
@@ -113,7 +113,7 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
     const priceMatches = product.price <= maxPrice;
     
     // Availability Match
-    const availabilityMatches = inStockOnly ? product.badge !== "Out of Stock" : true;
+    const availabilityMatches = inStockOnly ? (product.badge !== "Out of Stock" && product.availability !== "out_of_stock" && (product.stock === undefined || product.stock > 0)) : true;
 
     return categoryMatches && searchMatches && priceMatches && availabilityMatches;
   });
@@ -358,11 +358,11 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                       checked={inStockOnly}
                       onChange={() => setInStockOnly(!inStockOnly)}
                     />
-                    <span className="text-[13px] text-[#222] font-medium group-hover:text-[#D98C1F] transition-colors">In Stock ({activeProducts.filter(p => p.badge !== "Out of Stock").length})</span>
+                    <span className="text-[13px] text-[#222] font-medium group-hover:text-[#D98C1F] transition-colors">In Stock ({activeProducts.filter(p => p.badge !== "Out of Stock" && p.availability !== "out_of_stock" && (p.stock === undefined || p.stock > 0)).length})</span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer group opacity-60">
                     <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors bg-white border-gray-300`}></div>
-                    <span className="text-[13px] text-[#222] font-medium">Out of Stock ({activeProducts.filter(p => p.badge === "Out of Stock").length})</span>
+                    <span className="text-[13px] text-[#222] font-medium">Out of Stock ({activeProducts.filter(p => p.badge === "Out of Stock" || p.availability === "out_of_stock" || (p.stock !== undefined && p.stock <= 0)).length})</span>
                   </label>
                 </div>
               </div>
@@ -484,8 +484,8 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                       <Link href={`/products/${product.slug}`} className="block">
                         {/* Image area */}
                         <div className="relative bg-[#F4EFE6] h-40 sm:h-56 flex items-center justify-center overflow-hidden">
-                          {product.stock <= 0 ? (
-                            <span className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-sm z-10 bg-gray-500 text-white shadow-sm">
+                          {product.availability === "out_of_stock" || (product.stock !== undefined && product.stock <= 0) ? (
+                            <span className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-sm z-10 bg-red-500 text-white shadow-sm">
                               Out of Stock
                             </span>
                           ) : product.badge ? (
@@ -531,11 +531,11 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                           id={`add-cart-${product.id}`}
                           onClick={(e) => {
                             e.preventDefault();
-                            if (product.stock > 0) handleAddToCart(product);
+                            if (product.availability !== "out_of_stock" && (product.stock === undefined || product.stock > 0)) handleAddToCart(product);
                           }}
-                          disabled={product.stock <= 0}
+                          disabled={product.availability === "out_of_stock" || (product.stock !== undefined && product.stock <= 0)}
                           className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${
-                            product.stock <= 0 
+                            product.availability === "out_of_stock" || (product.stock !== undefined && product.stock <= 0)
                               ? "bg-gray-200 text-gray-400 cursor-not-allowed" 
                               : "bg-[#2C4631] hover:bg-[#1E3322] text-white hover:scale-105"
                           }`}

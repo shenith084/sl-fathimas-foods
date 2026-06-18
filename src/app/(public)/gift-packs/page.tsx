@@ -32,6 +32,13 @@ export default function BuildGiftPackPage() {
   const [cardMessage, setCardMessage] = useState("");
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
+  // Dynamic gift pack settings
+  const [giftPackSettings, setGiftPackSettings] = useState({
+    giftPackMinItems: 3,
+    giftPackRibbonPrice: 150,
+    giftPackGreetingCardPrice: 500,
+  });
+
   useEffect(() => {
     fetch("/api/v1/products")
       .then(res => res.json())
@@ -43,6 +50,34 @@ export default function BuildGiftPackPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchSettings = () => {
+      fetch(`/api/v1/settings?t=${Date.now()}`, { cache: "no-store" })
+        .then(res => res.json())
+        .then(json => {
+          if (json.success && json.data && isMounted) {
+            setGiftPackSettings({
+              giftPackMinItems: json.data.giftPackMinItems ?? 3,
+              giftPackRibbonPrice: json.data.giftPackRibbonPrice ?? 150,
+              giftPackGreetingCardPrice: json.data.giftPackGreetingCardPrice ?? 500,
+            });
+          }
+        })
+        .catch(console.error);
+    };
+
+    fetchSettings();
+    // Poll every 60 seconds instead of 3 to save server costs
+    const intervalId = setInterval(fetchSettings, 60000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, []);
 
   const handleDragStart = (e: React.DragEvent, product: Product) => {
@@ -84,20 +119,21 @@ export default function BuildGiftPackPage() {
 
   const totalItemsCount = boxItems.reduce((acc, item) => acc + item.qty, 0);
   const itemsTotal = boxItems.reduce((acc, item) => acc + (item.product.price * item.qty), 0);
-  const ribbonPrice = addRibbon ? 150 : 0;
-  const cardPrice = cardType !== "None" ? 500 : 0;
+  const ribbonPrice = addRibbon ? giftPackSettings.giftPackRibbonPrice : 0;
+  const cardPrice = cardType !== "None" ? giftPackSettings.giftPackGreetingCardPrice : 0;
   const grandTotal = itemsTotal + ribbonPrice + cardPrice;
+  const minItems = giftPackSettings.giftPackMinItems;
 
   const handleAddToCart = () => {
-    if (totalItemsCount < 3) {
-      alert("Please add at least 3 items to your gift pack.");
+    if (totalItemsCount < minItems) {
+      alert(`Please add at least ${minItems} items to your gift pack.`);
       return;
     }
     
     const description = `Box: ${boxSize}\n` +
       boxItems.map(i => `- ${i.qty}x ${i.product.name}`).join("\n") +
-      (addRibbon ? "\n- Decorative Ribbon (+150 LKR)" : "") +
-      (cardType !== "None" ? `\n- Card: ${cardType} (+500 LKR)\n  To: ${cardTo}\n  Message: "${cardMessage}"` : "") +
+      (addRibbon ? `\n- Decorative Ribbon (+${ribbonPrice} LKR)` : "") +
+      (cardType !== "None" ? `\n- Card: ${cardType} (+${cardPrice} LKR)\n  To: ${cardTo}\n  Message: "${cardMessage}"` : "") +
       (giftMessage ? `\nBox Note: "${giftMessage}"` : "");
 
     addItem({
@@ -150,7 +186,10 @@ export default function BuildGiftPackPage() {
             
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <label htmlFor="product-search" className="sr-only">Search products</label>
               <input 
+                id="product-search"
+                name="product-search"
                 type="text" 
                 placeholder="Search products..." 
                 value={search}
@@ -254,9 +293,9 @@ export default function BuildGiftPackPage() {
                 </div>
                 <button 
                   onClick={handleAddToCart}
-                  disabled={totalItemsCount < 3}
+                  disabled={totalItemsCount < minItems}
                   className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl font-bold transition-all
-                    ${totalItemsCount >= 3 
+                    ${totalItemsCount >= minItems 
                       ? 'bg-[#2C4631] hover:bg-[#1E3322] text-white shadow-lg' 
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }
@@ -268,9 +307,9 @@ export default function BuildGiftPackPage() {
               </div>
             </div>
             
-            {totalItemsCount < 3 && (
+            {totalItemsCount < minItems && (
               <div className="flex items-center gap-2 mt-3 text-xs font-medium text-[#2C4631] bg-[#2C4631]/10 px-4 py-2 rounded-xl">
-                <Info className="w-4 h-4" /> You must add a minimum of 3 items to create a gift pack.
+                <Info className="w-4 h-4" /> You must add a minimum of {minItems} items to create a gift pack.
               </div>
             )}
           </div>
@@ -320,8 +359,10 @@ export default function BuildGiftPackPage() {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#555] mb-1.5">Select Box Size</label>
+                  <label htmlFor="box-size" className="block text-xs font-semibold text-[#555] mb-1.5">Select Box Size</label>
                   <select 
+                    id="box-size"
+                    name="box-size"
                     value={boxSize}
                     onChange={(e) => setBoxSize(e.target.value)}
                     className="w-full bg-gray-50 border border-gray-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#D98C1F]"
@@ -333,8 +374,10 @@ export default function BuildGiftPackPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#555] mb-1.5">Add Gift Message (Optional)</label>
+                  <label htmlFor="gift-message" className="block text-xs font-semibold text-[#555] mb-1.5">Add Gift Message (Optional)</label>
                   <textarea 
+                    id="gift-message"
+                    name="gift-message"
                     value={giftMessage}
                     onChange={(e) => setGiftMessage(e.target.value)}
                     placeholder="Write a note to be placed inside the box... (Max 120 chars)"
@@ -346,9 +389,11 @@ export default function BuildGiftPackPage() {
 
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-semibold text-[#222]">Add Greeting Card (+LKR 500)</label>
+                    <label htmlFor="card-type" className="block text-xs font-semibold text-[#222]">Add Greeting Card (+LKR {giftPackSettings.giftPackGreetingCardPrice.toLocaleString()})</label>
                   </div>
                   <select 
+                    id="card-type"
+                    name="card-type"
                     value={cardType}
                     onChange={(e) => setCardType(e.target.value)}
                     className="w-full bg-white border border-gray-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-[#D98C1F]"
@@ -362,14 +407,20 @@ export default function BuildGiftPackPage() {
                   
                   {cardType !== "None" && (
                     <div className="space-y-3 pt-2">
+                      <label htmlFor="card-to" className="sr-only">To Name</label>
                       <input 
+                        id="card-to"
+                        name="card-to"
                         type="text" 
                         value={cardTo}
                         onChange={(e) => setCardTo(e.target.value)}
                         placeholder="To (Name)" 
                         className="w-full bg-white border border-gray-200 text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-[#D98C1F]"
                       />
+                      <label htmlFor="card-message" className="sr-only">Card Message</label>
                       <textarea 
+                        id="card-message"
+                        name="card-message"
                         value={cardMessage}
                         onChange={(e) => setCardMessage(e.target.value)}
                         placeholder="Message on the card..."
@@ -380,9 +431,11 @@ export default function BuildGiftPackPage() {
                   )}
                 </div>
 
-                <label className="flex items-center justify-between p-3 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                <label htmlFor="add-ribbon" className="flex items-center justify-between p-3 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-3">
                     <input 
+                      id="add-ribbon"
+                      name="add-ribbon"
                       type="checkbox" 
                       checked={addRibbon}
                       onChange={(e) => setAddRibbon(e.target.checked)}
@@ -390,7 +443,7 @@ export default function BuildGiftPackPage() {
                     />
                     <span className="text-sm font-medium text-[#222]">Add Decorative Ribbon</span>
                   </div>
-                  <span className="text-sm font-bold text-[#D98C1F]">LKR 150.00</span>
+                  <span className="text-sm font-bold text-[#D98C1F]">LKR {giftPackSettings.giftPackRibbonPrice.toLocaleString()}.00</span>
                 </label>
               </div>
             </div>

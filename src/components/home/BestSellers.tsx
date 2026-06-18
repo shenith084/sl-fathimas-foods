@@ -19,6 +19,8 @@ export interface Product {
   badge?: "Best Seller" | "New" | "Out of Stock" | "Popular";
   rating?: number;
   reviewCount?: number;
+  stock?: number;
+  availability?: string;
 }
 
 const bestSellers: Product[] = [
@@ -86,9 +88,10 @@ const bestSellers: Product[] = [
 ];
 
 const badgeColors: Record<string, string> = {
-  "Popular": "bg-[#D98C1F] text-white",
+  "Best Seller": "bg-[#D98C1F] text-white",
   New: "bg-[#2C4631] text-white",
-  "Out of Stock": "bg-gray-400 text-white",
+  Popular: "bg-[#D98C1F] text-white",
+  "Out of Stock": "bg-red-500 text-white",
 };
 
 function ProductCard({ product }: { product: Product }) {
@@ -111,13 +114,17 @@ function ProductCard({ product }: { product: Product }) {
     <div className="product-card flex-shrink-0 w-[200px] sm:w-[220px] bg-white rounded-xl overflow-hidden shadow-card group cursor-pointer">
       {/* Image area */}
       <div className="relative bg-gradient-to-br from-[#F4EFE6] to-[#FAF7F2] h-44 flex items-center justify-center overflow-hidden">
-        {product.badge && (
+        {product.availability === "out_of_stock" || (product.stock !== undefined && product.stock <= 0) ? (
+          <span className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full z-10 bg-red-500 text-white shadow-sm">
+            Out of Stock
+          </span>
+        ) : product.badge ? (
           <span
             className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full z-10 ${badgeColors[product.badge]}`}
           >
             {product.badge}
           </span>
-        )}
+        ) : null}
         {product.images && product.images.length > 0 ? (
           <Image 
             src={product.images[0]} 
@@ -202,6 +209,8 @@ export default function BestSellers({ liveProducts }: { liveProducts?: any[] }) 
         badge: p.badge,
         rating: p.rating || 4.9,
         reviewCount: p.reviews || 0,
+        stock: p.stock_count,
+        availability: p.availability,
       }));
     } else {
       // Fallback to updating prices on the default list if no popular products exist yet
@@ -212,6 +221,8 @@ export default function BestSellers({ liveProducts }: { liveProducts?: any[] }) 
             ...staticProd,
             price: liveMatch.price || staticProd.price,
             images: liveMatch.images || undefined,
+            stock: liveMatch.stock_count,
+            availability: liveMatch.availability,
           };
         }
         return staticProd;

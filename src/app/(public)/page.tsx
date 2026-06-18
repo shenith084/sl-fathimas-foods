@@ -9,6 +9,8 @@ import { getProducts } from "@/lib/services/productService";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://slfathimasfoods.com";
 
+export const dynamic = 'force-dynamic'; // Always fetch fresh products to reflect admin changes
+
 export const metadata: Metadata = {
   title: "SL Fathima's Foods — Authentic Homemade Food Products Sri Lanka",
   description:

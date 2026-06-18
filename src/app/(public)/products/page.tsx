@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Browse our complete catalog of premium homemade Sri Lankan foods. Authentic biriyani kits, sambals, pickles, and gift packs with island-wide delivery.",
 };
 
-export const revalidate = 60; // Revalidate the cache every 60 seconds
+export const dynamic = 'force-dynamic'; // Always fetch fresh products to reflect admin changes
 
 export default async function ProductsPage() {
   // Fetch live products securely from Firestore on the Server!
@@ -26,7 +26,8 @@ export default async function ProductsPage() {
     rating: p.rating || 4.9,
     reviews: p.reviews || 0,
     images: (p as any).images || undefined,
-    stock: p.stock_count ?? 0,
+    stock: p.stock_count ?? 10,
+    availability: p.availability || "in_stock",
   }));
 
   return <ProductsClientComponent initialProducts={initialProducts} />;

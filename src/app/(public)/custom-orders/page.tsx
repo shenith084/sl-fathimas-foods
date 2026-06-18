@@ -231,7 +231,7 @@ export default function CustomOrdersPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-xs font-bold text-[#333] mb-2">Preferred Delivery Date <span className="text-red-500">*</span></label>
-                    <input type="date" required value={form.date} onChange={(e) => update("date", e.target.value)}
+                    <input type="date" min={new Date().toISOString().split('T')[0]} required value={form.date} onChange={(e) => update("date", e.target.value)}
                       className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#2C4631] focus:ring-1 focus:ring-[#2C4631] transition-colors" />
                   </div>
                   <div>

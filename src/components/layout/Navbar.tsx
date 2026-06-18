@@ -55,18 +55,30 @@ export default function Navbar() {
     return () => unsubscribe();
   }, []);
 
-  // Poll for unread messages when the pathname changes or user logs in
+  // Poll for unread messages when the pathname changes or every 45s
   useEffect(() => {
-    if (currentUser && !isAdmin) {
-      fetch(`/api/v1/orders?userId=${currentUser.uid}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            setHasUnreadOrders(data.data.some((o: any) => o.hasUnreadMessage));
-          }
-        })
-        .catch(console.error);
-    }
+    let isMounted = true;
+    
+    const checkUnreadOrders = () => {
+      if (currentUser) {
+        fetch(`/api/v1/orders?userId=${currentUser.uid}&t=${Date.now()}`, { cache: "no-store" })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && isMounted) {
+              setHasUnreadOrders(data.data.some((o: any) => o.hasUnreadMessage));
+            }
+          })
+          .catch(console.error);
+      }
+    };
+
+    checkUnreadOrders();
+    const intervalId = setInterval(checkUnreadOrders, 45000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, [currentUser, isAdmin, pathname]);
 
   const handleSignOut = async () => {
@@ -184,15 +196,15 @@ export default function Navbar() {
             </div>
 
             {/* Actions */}
-            <div className="flex-shrink-0 flex justify-end items-center gap-1 sm:gap-2">
+            <div className="flex-shrink-0 flex justify-end items-center gap-0 sm:gap-1 md:gap-2 -mr-2 sm:mr-0">
               <div ref={searchContainerRef} className="relative">
                 <button
                   id="navbar-search-btn"
                   aria-label="Search"
                   onClick={() => setShowSearch(!showSearch)}
-                  className="p-2 rounded-lg text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors flex items-center justify-center"
+                  className="p-1.5 sm:p-2 rounded-lg text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors flex items-center justify-center"
                 >
-                  <Search className="w-5 h-5" />
+                  <Search className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 {showSearch && (
                   <div className="absolute right-0 top-[calc(100%+0.5rem)] w-72 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 p-3 z-50 animate-fade-in origin-top-right">
@@ -216,14 +228,14 @@ export default function Navbar() {
                   <button
                     id="navbar-account-btn"
                     onClick={() => setAuthDropdown(!authDropdown)}
-                    className="p-2 rounded-lg text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors flex items-center justify-center"
+                    className="p-1.5 sm:p-2 rounded-lg text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors flex items-center justify-center"
                     aria-label="User account menu"
                   >
-                    <div className={`w-7 h-7 rounded-full ${isAdmin ? "bg-[#D98C1F]" : "bg-[#2C4631]"} hover:opacity-90 text-white flex items-center justify-center text-xs font-bold transition-colors shadow-sm`}>
+                    <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full ${isAdmin ? "bg-[#D98C1F]" : "bg-[#2C4631]"} hover:opacity-90 text-white flex items-center justify-center text-[10px] sm:text-xs font-bold transition-colors shadow-sm`}>
                       {currentUser.displayName ? currentUser.displayName[0].toUpperCase() : currentUser.email ? currentUser.email[0].toUpperCase() : "U"}
                     </div>
                     {hasUnreadOrders && (
-                      <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+                      <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
                     )}
                   </button>
                   {authDropdown && (
@@ -270,9 +282,9 @@ export default function Navbar() {
                   href="/auth"
                   id="navbar-account-btn"
                   aria-label="Account"
-                  className="p-2 rounded-lg text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors"
+                  className="p-1.5 sm:p-2 rounded-lg text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors"
                 >
-                  <User className="w-5 h-5" />
+                  <User className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
               )}
 
@@ -280,11 +292,11 @@ export default function Navbar() {
                 href="/cart"
                 id="navbar-cart-btn"
                 aria-label="Shopping cart"
-                className="relative p-2 rounded-lg text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors"
+                className="relative p-1.5 sm:p-2 rounded-lg text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors"
               >
-                <ShoppingCart className="w-5 h-5" />
+                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#D98C1F] text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-4 h-4 sm:w-5 sm:h-5 bg-[#D98C1F] text-white text-[9px] sm:text-xs font-bold rounded-full flex items-center justify-center">
                     {cartCount}
                   </span>
                 )}
@@ -295,9 +307,9 @@ export default function Navbar() {
                 id="navbar-mobile-menu-btn"
                 aria-label="Open menu"
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="lg:hidden p-2 rounded-lg text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors"
+                className="lg:hidden p-1.5 sm:p-2 rounded-lg text-[#555] hover:text-[#D98C1F] hover:bg-[#FAF7F2] transition-colors"
               >
-                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {mobileOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5" />}
               </button>
             </div>
           </div>

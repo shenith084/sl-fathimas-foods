@@ -143,8 +143,8 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
     aggregateRating: product.rating
       ? {
           "@type": "AggregateRating",
-          ratingValue: product.rating,
-          reviewCount: product.reviews || 1,
+          ratingValue: product.rating || 5,
+          reviewCount: reviews.length || 1,
           bestRating: 5,
           worstRating: 1,
         }
@@ -262,9 +262,15 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
           <div className="pt-2 flex flex-col">
             {/* Badges */}
             <div className="flex items-center gap-2 mb-4">
-              <span className="bg-[#D98C1F] text-white text-xs font-bold px-3 py-1 rounded-full">
-                {product.badge || "Best Seller"}
-              </span>
+              {product.availability === "out_of_stock" || (product.stock_count ?? product.stock ?? 0) <= 0 ? (
+                <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  Out of Stock
+                </span>
+              ) : product.badge ? (
+                <span className="bg-[#D98C1F] text-white text-xs font-bold px-3 py-1 rounded-full">
+                  {product.badge}
+                </span>
+              ) : null}
               <span className="bg-[#F4EFE6] text-[#2C4631] text-xs font-bold px-3 py-1 rounded-full">
                 Handmade
               </span>
@@ -273,7 +279,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
             <h1 className="font-display font-bold text-[#222] text-3xl md:text-4xl mb-4 leading-tight">{product.name}</h1>
 
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <StarRating rating={product.rating || 5.0} count={product.reviews || 128} />
+              <StarRating rating={product.rating || 5.0} count={reviews.length} />
               <span className="text-[#888] text-sm font-medium">SKU: {product.id.slice(0,6).toUpperCase()}</span>
             </div>
 
@@ -322,11 +328,11 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <button
                 onClick={handleAddToCart}
-                disabled={added || (product.stock_count ?? product.stock ?? 0) <= 0}
+                disabled={added || product.availability === "out_of_stock" || (product.stock_count ?? product.stock ?? 0) <= 0}
                 className={`flex-1 text-white font-bold py-3.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 ${
                   added 
                     ? "bg-[#2C4631]" 
-                    : (product.stock_count ?? product.stock ?? 0) <= 0 
+                    : product.availability === "out_of_stock" || (product.stock_count ?? product.stock ?? 0) <= 0 
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none" 
                       : "bg-[#1E3322] hover:bg-[#152418]"
                 }`}
@@ -343,7 +349,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                   </>
                 )}
               </button>
-              {(product.stock_count ?? product.stock ?? 0) > 0 && (
+              {product.availability !== "out_of_stock" && (product.stock_count ?? product.stock ?? 0) > 0 && (
                 <Link
                   href="/checkout"
                   onClick={handleAddToCart}
@@ -375,7 +381,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
         <div className="mt-16">
           <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-10 shadow-sm">
             <div className="flex flex-wrap gap-8 border-b border-gray-100 mb-10 pb-4">
-              {["Description", "Ingredients", `Reviews (${product.reviews || 120})`, "Delivery & Returns"].map((tab) => (
+              {["Description", "Ingredients", `Reviews (${reviews.length})`, "Delivery & Returns"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -471,7 +477,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                 Customer <span className="text-[#D98C1F]">Reviews</span>
               </h2>
               <div className="flex items-center gap-2">
-                <StarRating rating={product.rating || 5} count={product.reviews || 0} />
+                <StarRating rating={product.rating || 5} count={reviews.length} />
               </div>
             </div>
             {user ? (

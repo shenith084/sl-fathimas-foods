@@ -189,7 +189,7 @@ export default function AboutPage() {
       <section className="py-12 md:py-16 px-4 bg-white border-t border-gray-100">
         <div className="max-w-5xl mx-auto bg-[#2C4631] rounded-3xl p-8 md:p-10 relative overflow-hidden shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Background Elements */}
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 pointer-events-none mix-blend-overlay"></div>
+          <div className="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay"></div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#D98C1F] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
           
           <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left flex-1">

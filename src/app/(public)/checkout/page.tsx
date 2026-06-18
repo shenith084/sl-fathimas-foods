@@ -10,6 +10,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { event as fbEvent } from "@/components/analytics/MetaPixel";
 import { ttevent } from "@/components/analytics/TikTokPixel";
+import OrderPixelTracker from "@/components/analytics/OrderPixelTracker";
 
 const steps = ["Cart", "Shipping", "Payment", "Confirm"];
 
@@ -29,6 +30,7 @@ export default function CheckoutPage() {
 
   const [mounted, setMounted] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [placedOrderId, setPlacedOrderId] = useState<string | null>(null);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -89,10 +91,12 @@ export default function CheckoutPage() {
           phone: fetchedPhone || f.phone,
           address: fetchedAddress || f.address,
         }));
+      } else {
+        router.push("/auth?redirect=/checkout");
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const subtotal = getCartTotal();
   const deliveryCharge = settings?.deliveryCharge ?? 450;
@@ -204,7 +208,7 @@ export default function CheckoutPage() {
 
       setOrderPlaced(true);
       clearCart();
-      router.push(`/order-confirmation?orderId=${json.data.id}`);
+      setPlacedOrderId(json.data.id);
     } catch (err: any) {
       console.error("Order submission failed:", err);
       setErrorMsg(err.message || "An unexpected error occurred. Please contact support.");
@@ -450,6 +454,53 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {placedOrderId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <OrderPixelTracker orderId={placedOrderId} total={total} />
+          <div className="bg-white rounded-3xl p-8 md:p-10 max-w-lg w-full shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-300 relative">
+            <div className="w-20 h-20 rounded-full border-2 border-green-500 flex items-center justify-center mb-6 bg-green-50">
+              <Check className="w-10 h-10 text-green-500" strokeWidth={3} />
+            </div>
+
+            <h1 className="font-display font-bold text-[#222] text-3xl mb-3">
+              Thank You!
+            </h1>
+            <p className="text-[#222] font-medium mb-8">
+              Your order has been placed successfully.
+            </p>
+
+            {/* Order Number Box */}
+            <div className="bg-[#EDF2EC] rounded-2xl py-6 px-8 sm:px-12 text-center w-full mb-6 border border-[#DCE4DA]">
+              <p className="text-[#555] font-semibold mb-2 text-sm">Order Number</p>
+              <p className="font-display font-bold text-[#2C4631] text-2xl sm:text-3xl tracking-wide break-all">{placedOrderId}</p>
+            </div>
+
+            <p className="text-[#666] text-sm mb-2">
+              We have received your order and it is now being processed.
+            </p>
+            <p className="text-[#666] text-sm mb-10">
+              You will receive a confirmation email and WhatsApp message shortly.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
+              <Link
+                href="/account/orders"
+                className="flex-1 bg-[#4A5D4E] hover:bg-[#3A4A3E] text-white font-bold py-3.5 rounded-xl transition-colors text-center text-sm tracking-wide"
+              >
+                VIEW MY ORDERS
+              </Link>
+              <Link
+                href="/products"
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-[#444] font-bold py-3.5 rounded-xl transition-colors text-center text-sm tracking-wide"
+              >
+                CONTINUE SHOPPING
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
