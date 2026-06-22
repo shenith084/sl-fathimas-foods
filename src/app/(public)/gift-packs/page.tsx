@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Search, Plus, Trash2, ShoppingCart, Info, Package } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
+import toast from "react-hot-toast";
 
 interface Product {
   id: string;
@@ -126,7 +127,7 @@ export default function BuildGiftPackPage() {
 
   const handleAddToCart = () => {
     if (totalItemsCount < minItems) {
-      alert(`Please add at least ${minItems} items to your gift pack.`);
+      toast.error(`Please add at least ${minItems} items to your gift pack.`);
       return;
     }
     

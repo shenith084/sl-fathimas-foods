@@ -11,6 +11,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { event as fbEvent } from "@/components/analytics/MetaPixel";
 import { ttevent } from "@/components/analytics/TikTokPixel";
 import OrderPixelTracker from "@/components/analytics/OrderPixelTracker";
+import toast from "react-hot-toast";
 
 const steps = ["Cart", "Shipping", "Payment", "Confirm"];
 
@@ -122,7 +123,7 @@ export default function CheckoutPage() {
   const handleContinueToPayment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.firstName || !form.lastName || !form.email || !form.phone || !form.address || !form.city || !form.district) {
-      alert("Please fill in all required fields marked with *");
+      toast.error("Please fill in all required fields marked with *");
       return;
     }
     setStep(2);

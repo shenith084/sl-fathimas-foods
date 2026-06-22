@@ -7,6 +7,7 @@ import { auth } from "@/lib/firebase/client";
 import { Package, ShoppingBag } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 interface Order {
   id: string;
@@ -99,7 +100,7 @@ export default function MyOrdersPage() {
       setUploadSuccessId(orderId);
       setTimeout(() => setUploadSuccessId(null), 3000);
     } catch (err: any) {
-      alert("Failed to upload: " + err.message);
+      toast.error("Failed to upload: " + err.message);
     } finally {
       setUploadingReceiptId(null);
     }

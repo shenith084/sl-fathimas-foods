@@ -2,13 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 
 const categories = [
+  { label: "All Products", slug: "All", image: "/categories/umbalakada.png", color: "bg-gray-100" },
   { label: "Biriyani Kit", slug: "biriyani-kit", image: "/categories/biriyani.png", color: "bg-amber-100" },
   { label: "Ghee Rice", slug: "ghee-rice-combo-kit", image: "/categories/ghee_rice.png", color: "bg-yellow-100" },
-  { label: "Sambals", slug: "sambals", image: "/categories/sambals.png", color: "bg-red-100" },
   { label: "Pickles", slug: "pickles", image: "/categories/pickles.png", color: "bg-green-100" },
   { label: "Seenima", slug: "seenima", image: "/categories/seenima.png", color: "bg-orange-100" },
-  { label: "Umbalakada", slug: "umbalakada", image: "/categories/umbalakada.png", color: "bg-blue-100" },
-  { label: "Beef Products", slug: "beef-products", image: "/categories/beef.png", color: "bg-rose-100" },
+  { label: "Sambals", slug: "sambals", image: "/categories/sambals.png", color: "bg-red-100" },
+  { label: "Food Truck List", slug: "food-truck-list", image: "/categories/beef.png", color: "bg-indigo-100" },
   { label: "Gift Packs", slug: "gift-packs", image: "/categories/gift_packs.png", color: "bg-purple-100" },
   { label: "Custom Orders", slug: "custom-orders", image: "/categories/custom_orders.png", color: "bg-teal-100" },
 ];
@@ -30,7 +30,8 @@ export default function CategoryShowcase() {
               href={
                 cat.slug === "custom-orders" ? "/custom-orders" :
                 cat.slug === "gift-packs" ? "/gift-packs" :
-                "/products"
+                cat.slug === "All" ? "/products" :
+                `/products?category=${cat.slug}`
               }
               id={`category-${cat.slug}`}
               className="flex flex-col items-center gap-3 group"

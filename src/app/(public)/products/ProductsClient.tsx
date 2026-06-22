@@ -94,12 +94,12 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
 
   // Filter products by Category & Search query
   const filteredProducts = activeProducts.filter((product) => {
-    // Category match
     const categoryMatches =
       activeCategorySlug === "All" ||
       (activeCategorySlug === "food-truck-list" 
         ? foodTruckListIds.includes(product.id) 
         : product.category.toLowerCase() === activeCategorySlug.toLowerCase() ||
+          product.category.toLowerCase().startsWith(activeCategorySlug.toLowerCase() + "-") ||
           product.category.toLowerCase().startsWith(activeCategorySlug.toLowerCase().replace(/s$/, "") + "-"));
 
     // Search query match
@@ -265,7 +265,9 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                     const isActive = activeCategorySlug.toLowerCase() === cat.slug.toLowerCase();
                     const count = cat.slug === "food-truck-list" 
                       ? activeProducts.filter(p => foodTruckListIds.includes(p.id)).length
-                      : activeProducts.filter(p => p.category.toLowerCase() === cat.slug.toLowerCase()).length;
+                      : activeProducts.filter(p => p.category.toLowerCase() === cat.slug.toLowerCase() || 
+                                                 p.category.toLowerCase().startsWith(cat.slug.toLowerCase() + "-") ||
+                                                 p.category.toLowerCase().startsWith(cat.slug.toLowerCase().replace(/s$/, "") + "-")).length;
                     
                     return (
                       <li key={cat.id} className="flex flex-col gap-1">

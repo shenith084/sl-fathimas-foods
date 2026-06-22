@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Send, MapPin, Phone, Mail, Clock, MessageCircle, ShoppingBag, Package, Handshake, Star, Heart, ShieldCheck, Truck } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", subject: "", message: "" });
@@ -44,7 +45,7 @@ export default function ContactPage() {
       setSelectedSubject("");
     } catch (error) {
       console.error("Error submitting message:", error);
-      alert("There was an error sending your message. Please try again or contact us directly.");
+      toast.error("There was an error sending your message. Please try again or contact us directly.");
     } finally {
       setSubmitting(false);
     }

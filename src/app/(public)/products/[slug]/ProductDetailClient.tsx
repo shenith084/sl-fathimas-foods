@@ -15,6 +15,7 @@ import Image from "next/image";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import ReviewModal from "@/components/products/ReviewModal";
+import toast from "react-hot-toast";
 
 function StarRating({ rating, count }: { rating: number; count: number }) {
   return (
@@ -580,7 +581,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
           onClose={() => setShowReviewModal(false)}
           onSuccess={() => {
             setShowReviewModal(false);
-            alert("Your review has been published! Please refresh to see it.");
+            toast.success("Your review has been published! Please refresh to see it.");
           }}
         />
       )}

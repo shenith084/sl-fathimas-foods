@@ -8,6 +8,7 @@ import {
   CheckCircle, Leaf, Box, Truck, Heart, BadgeCheck, Star, 
   ThumbsUp, HelpCircle 
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 const orderTypes = [
   { id: "gift-hamper", label: "Gift Hamper", icon: Gift },
@@ -79,11 +80,11 @@ export default function CustomOrdersPage() {
       if (res.ok) {
         setSubmitted(true);
       } else {
-        alert("Failed to submit request. Please try again.");
+        toast.error("Failed to submit request. Please try again.");
       }
     } catch (err) {
       console.error(err);
-      alert("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }

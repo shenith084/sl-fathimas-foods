@@ -6,6 +6,7 @@ import MetaPixel from "@/components/analytics/MetaPixel";
 import TikTokPixel from "@/components/analytics/TikTokPixel";
 import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -116,6 +117,7 @@ export default function RootLayout({
         />
         <NextTopLoader color="#D98C1F" showSpinner={false} />
         <Toaster position="bottom-right" />
+        <ConfirmModal />
         <main>{children}</main>
       </body>
     </html>
