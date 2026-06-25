@@ -362,10 +362,6 @@ function ProductsContent({ initialProducts }: { initialProducts: any[] }) {
                     />
                     <span className="text-[13px] text-[#222] font-medium group-hover:text-[#D98C1F] transition-colors">In Stock ({activeProducts.filter(p => p.badge !== "Out of Stock" && p.availability !== "out_of_stock" && (p.stock === undefined || p.stock > 0)).length})</span>
                   </label>
-                  <label className="flex items-center gap-3 cursor-pointer group opacity-60">
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors bg-white border-gray-300`}></div>
-                    <span className="text-[13px] text-[#222] font-medium">Out of Stock ({activeProducts.filter(p => p.badge === "Out of Stock" || p.availability === "out_of_stock" || (p.stock !== undefined && p.stock <= 0)).length})</span>
-                  </label>
                 </div>
               </div>
 
